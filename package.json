@@ -1,0 +1,63 @@
+{
+  "name": "leverage-journal",
+  "version": "1.0.0",
+  "description": "The ultimate 90-day achievement system that combines psychology-backed planning with AI-powered insights",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "export": "next export"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.2.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.553.0",
+    "next": "^14.2.33",
+    "next-themes": "^0.4.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss-animate": "^1.0.7",
+    "web-vitals": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.24",
+    "@types/react": "^18.3.26",
+    "@types/react-dom": "^18.3.7",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.33",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.18",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "keywords": [
+    "goal-setting",
+    "productivity",
+    "journal",
+    "achievement",
+    "90-day-system",
+    "ai-insights",
+    "psychology-backed",
+    "success-tracking"
+  ],
+  "author": "Leverage Journal Team",
+  "license": "MIT",
+  "homepage": "https://leveragejournal.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KhamareClarke/leveragejournel.git"
+  },
+  "bugs": {
+    "url": "https://github.com/KhamareClarke/leveragejournel/issues"
+  }
+}
