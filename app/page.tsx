@@ -99,78 +99,74 @@ export default function HomePage() {
             <div className="grid lg:grid-cols-2 gap-12 items-center min-h-[80vh]">
               {/* Left Column - Content */}
               <div className="space-y-8">
-                {/* Badge */}
-                <div className="inline-flex items-center bg-yellow-500/20 border border-yellow-500/30 rounded-full px-4 py-2">
-                  <Star className="w-4 h-4 text-yellow-400 mr-2" />
-                  <span className="text-yellow-200 text-sm font-medium">94% Success Rate • 10,000+ Achievers</span>
+                {/* Social Proof Badge */}
+                <div className="inline-flex items-center px-4 py-2 bg-green-600/20 border border-green-600/30 rounded-full text-green-400 text-sm font-medium">
+                  <Users className="w-4 h-4 mr-2" />
+                  Join 10,000+ High Achievers
                 </div>
 
-                {/* Main Headline */}
-                <div>
-                  <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-                    Transform Your
-                    <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600">
-                      Goals Into Success
-                    </span>
+                {/* Power Headline */}
+                <div className="space-y-6">
+                  <h1 className="text-5xl lg:text-7xl font-bold leading-tight">
+                    <span className="text-white">90 Days to</span>
+                    <br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600">Life-Changing</span>
+                    <br />
+                    <span className="text-white">Results</span>
                   </h1>
-                  <p className="text-xl md:text-2xl text-gray-300 mt-6 leading-relaxed">
-                    The ultimate 90-day achievement system that combines psychology-backed planning with AI-powered insights. 
-                    Join thousands who've turned their dreams into systematic success.
+                  <p className="text-2xl text-gray-300 font-medium max-w-2xl">
+                    The proven system that turns your biggest goals into inevitable wins.
                   </p>
                 </div>
 
-                {/* Key Benefits */}
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-400" />
-                    <span className="text-gray-300">Physical Journal + Mobile App</span>
+                {/* Urgency + Benefits */}
+                <div className="bg-gradient-to-r from-yellow-600/10 to-yellow-500/10 border border-yellow-600/20 rounded-xl p-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-yellow-400 font-bold text-lg">LIMITED TIME OFFER</span>
+                    <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">50% OFF</span>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-400" />
-                    <span className="text-gray-300">AI-Powered Insights</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-400" />
-                    <span className="text-gray-300">Psychology-Backed Framework</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-400" />
-                    <span className="text-gray-300">30-Day Money-Back Guarantee</span>
+                  
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+                      <span className="text-white font-medium">Physical Journal + App</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+                      <span className="text-white font-medium">AI Success Coaching</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+                      <span className="text-white font-medium">Psychology-Backed System</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+                      <span className="text-white font-medium">Money-Back Guarantee</span>
+                    </div>
                   </div>
                 </div>
 
                 {/* Pricing & CTA */}
                 <div className="space-y-6">
-                  <div className="flex items-center space-x-4">
-                    <div className="text-4xl font-bold text-yellow-400">£19.99</div>
-                    <div className="text-gray-400">
-                      <span className="line-through text-2xl">£39.99</span>
-                      <span className="ml-2 bg-red-600 text-white px-2 py-1 rounded text-sm font-bold">50% OFF</span>
+                  <div className="flex items-baseline space-x-4">
+                    <div className="text-5xl font-bold text-yellow-400">£19.99</div>
+                    <div className="space-x-2">
+                      <span className="line-through text-2xl text-gray-500">£39.99</span>
+                      <span className="text-green-400 font-bold">Save £20!</span>
                     </div>
                   </div>
                   
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <Link href="/dashboard" className="flex-1">
-                      <Button size="lg" className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-bold text-lg py-6">
-                        Pre-Order Now
-                        <ArrowRight className="w-5 h-5 ml-2" />
+                  <div className="space-y-4">
+                    <Link href="/dashboard" className="block">
+                      <Button size="lg" className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-bold text-xl py-8 shadow-2xl shadow-yellow-500/25">
+                        CLAIM YOUR COPY NOW
+                        <ArrowRight className="w-6 h-6 ml-3" />
                       </Button>
                     </Link>
-                    <Link href="/how-it-works">
-                      <Button size="lg" variant="outline" className="border-yellow-600/30 text-yellow-400 hover:bg-yellow-500/10 py-6">
-                        How It Works
-                      </Button>
-                    </Link>
-                  </div>
-
-                  <div className="flex items-center space-x-6 text-sm text-gray-400">
-                    <div className="flex items-center space-x-2">
-                      <Shield className="w-4 h-4" />
-                      <span>Free Worldwide Shipping</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Clock className="w-4 h-4" />
-                      <span>Ships in 2-3 weeks</span>
+                    
+                    <div className="text-center">
+                      <p className="text-sm text-gray-400 mb-2">Instant Access • Free Shipping • 30-Day Guarantee</p>
+                      <p className="text-xs text-red-400 font-medium">Only 127 copies left at this price!</p>
                     </div>
                   </div>
                 </div>
@@ -312,170 +308,136 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Features Section */}
-        <LazySection className="py-20 bg-neutral-900/50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                Why <span className="text-yellow-400">Leverage Journal™</span> Works
-              </h2>
-              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-                Our system combines proven psychology with cutting-edge technology to create the ultimate achievement framework.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[
-                {
-                  icon: Brain,
-                  title: 'Psychology-Backed Framework',
-                  description: 'Built on proven behavioral science and goal-setting research for maximum effectiveness.',
-                  alt: 'Psychology-backed goal setting framework icon'
-                },
-                {
-                  icon: Zap,
-                  title: 'AI-Powered Insights',
-                  description: 'Get personalized recommendations and progress analysis powered by artificial intelligence.',
-                  alt: 'AI-powered insights and analytics icon'
-                },
-                {
-                  icon: Target,
-                  title: '90-Day Success System',
-                  description: 'Scientifically optimal timeframe for habit formation and sustainable goal achievement.',
-                  alt: '90-day achievement system target icon'
-                },
-                {
-                  icon: Smartphone,
-                  title: 'Physical + Digital Sync',
-                  description: 'Premium journal paired with mobile app for seamless progress tracking anywhere.',
-                  alt: 'Physical journal and mobile app synchronization icon'
-                },
-                {
-                  icon: BarChart3,
-                  title: 'Real-Time Progress Tracking',
-                  description: 'Visual dashboards and analytics to keep you motivated and on track.',
-                  alt: 'Real-time progress tracking and analytics icon'
-                },
-                {
-                  icon: Trophy,
-                  title: '94% Success Rate',
-                  description: 'Join thousands of achievers who have transformed their goals into systematic success.',
-                  alt: 'High success rate achievement trophy icon'
-                }
-              ].map((feature, index) => (
-                <Card key={index} className="bg-neutral-800/50 border border-yellow-600/20 p-8 hover:border-yellow-400/40 transition-all duration-300 group">
-                  <div className="w-16 h-16 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <feature.icon className="w-8 h-8 text-black" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-4">{feature.title}</h3>
-                  <p className="text-gray-300 leading-relaxed">{feature.description}</p>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </LazySection>
-
-        {/* Testimonials Section */}
-        <LazySection className="py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                Success <span className="text-yellow-400">Stories</span>
-              </h2>
-              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-                Real results from real people who transformed their lives with Leverage Journal™.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              {[
-                {
-                  name: 'Sarah M.',
-                  role: 'Entrepreneur',
-                  content: "It's like having a coach, therapist, and strategist in one. The 90-day structure completely changed how I approach my goals.",
-                  rating: 5,
-                  image: '/images/testimonial-sarah.jpg'
-                },
-                {
-                  name: 'James P.',
-                  role: 'Business Executive',
-                  content: 'My productivity doubled in 30 days. The app sync keeps me accountable even when I\'m traveling.',
-                  rating: 5,
-                  image: '/images/testimonial-james.jpg'
-                },
-                {
-                  name: 'Maya T.',
-                  role: 'Creative Director',
-                  content: 'I finally follow through on my commitments. This system actually works where others failed.',
-                  rating: 5,
-                  image: '/images/testimonial-maya.jpg'
-                }
-              ].map((testimonial, index) => (
-                <Card key={index} className="bg-neutral-900/50 border border-yellow-600/20 p-8">
-                  <div className="flex items-center space-x-1 mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                    ))}
-                  </div>
-                  <p className="text-gray-300 mb-6 leading-relaxed">"{testimonial.content}"</p>
-                  <div className="flex items-center space-x-4">
-                    <OptimizedImage
-                      src={testimonial.image.replace('.jpg', '.svg')}
-                      alt={`${testimonial.name} - Leverage Journal™ success story testimonial`}
-                      width={48}
-                      height={48}
-                      className="rounded-full"
-                    />
-                    <div>
-                      <div className="font-semibold text-white">{testimonial.name}</div>
-                      <div className="text-gray-400 text-sm">{testimonial.role}</div>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </LazySection>
-
-        {/* CTA Section */}
-        <LazySection className="py-20 bg-gradient-to-r from-yellow-600/20 to-yellow-500/10">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Ready to Transform Your Goals?
-            </h2>
-            <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-              Join 10,000+ achievers who have turned their dreams into systematic success with Leverage Journal™.
-            </p>
-            
-            <div className="space-y-6">
-              <div className="flex items-center justify-center space-x-4">
-                <div className="text-5xl font-bold text-yellow-400">£19.99</div>
-                <div className="text-gray-400">
-                  <span className="line-through text-3xl">£39.99</span>
-                  <span className="ml-2 bg-red-600 text-white px-3 py-1 rounded text-lg font-bold">50% OFF</span>
+        {/* Social Proof + Features */}
+        <LazySection className="py-16 bg-neutral-900/50">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Social Proof Numbers */}
+            <div className="text-center mb-12">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div>
+                  <div className="text-4xl font-bold text-yellow-400">10K+</div>
+                  <div className="text-gray-400 text-sm">Success Stories</div>
+                </div>
+                <div>
+                  <div className="text-4xl font-bold text-green-400">94%</div>
+                  <div className="text-gray-400 text-sm">Achievement Rate</div>
+                </div>
+                <div>
+                  <div className="text-4xl font-bold text-blue-400">90</div>
+                  <div className="text-gray-400 text-sm">Days to Transform</div>
+                </div>
+                <div>
+                  <div className="text-4xl font-bold text-purple-400">4.9★</div>
+                  <div className="text-gray-400 text-sm">User Rating</div>
                 </div>
               </div>
+            </div>
+
+            {/* Key Benefits */}
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="bg-gradient-to-br from-yellow-600/10 to-yellow-500/5 border border-yellow-600/20 rounded-xl p-6 text-center">
+                <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Brain className="w-6 h-6 text-black" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Science-Backed</h3>
+                <p className="text-gray-300">Psychology + AI = Guaranteed Results</p>
+              </div>
               
-              <Link href="/dashboard">
-                <Button size="lg" className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-bold text-xl py-8 px-12">
-                  Start Your 90-Day Journey Now
-                  <ArrowRight className="w-6 h-6 ml-3" />
+              <div className="bg-gradient-to-br from-green-600/10 to-green-500/5 border border-green-600/20 rounded-xl p-6 text-center">
+                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Smartphone className="w-6 h-6 text-black" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Physical + Digital</h3>
+                <p className="text-gray-300">Journal + App = Perfect Sync</p>
+              </div>
+              
+              <div className="bg-gradient-to-br from-blue-600/10 to-blue-500/5 border border-blue-600/20 rounded-xl p-6 text-center">
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Trophy className="w-6 h-6 text-black" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Proven System</h3>
+                <p className="text-gray-300">90 Days = Life Transformation</p>
+              </div>
+            </div>
+
+            {/* CTA Section */}
+            <div className="text-center mt-12">
+              <div className="bg-gradient-to-r from-red-600/20 to-red-500/10 border border-red-600/30 rounded-xl p-8 max-w-2xl mx-auto">
+                <h3 className="text-2xl font-bold text-white mb-4">⚠️ WARNING: Price Increases Tomorrow!</h3>
+                <p className="text-gray-300 mb-6">Join 10,000+ high achievers before the price goes back to £39.99</p>
+                <Link href="/dashboard">
+                  <Button size="lg" className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-bold text-lg px-12 py-4">
+                    🔥 SECURE YOUR COPY - £19.99
+                  </Button>
+                </Link>
+                <p className="text-xs text-gray-400 mt-3">💯 30-Day Money-Back Guarantee • 🚚 Free Worldwide Shipping</p>
+              </div>
+            </div>
+          </div>
+        </LazySection>
+
+        {/* Quick Testimonials + Final CTA */}
+        <LazySection className="py-16">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-3xl font-bold text-white mb-8">
+              What Our <span className="text-yellow-400">10,000+</span> Users Say
+            </h2>
+
+            <div className="grid md:grid-cols-3 gap-6 mb-12">
+              <div className="bg-neutral-900/50 border border-yellow-600/20 rounded-xl p-6">
+                <div className="flex justify-center mb-3">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <p className="text-gray-300 text-sm mb-3">"Doubled my productivity in 30 days!"</p>
+                <p className="text-gray-500 text-xs">- Sarah M.</p>
+              </div>
+              
+              <div className="bg-neutral-900/50 border border-yellow-600/20 rounded-xl p-6">
+                <div className="flex justify-center mb-3">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <p className="text-gray-300 text-sm mb-3">"Finally achieved my 5-year goal!"</p>
+                <p className="text-gray-500 text-xs">- James P.</p>
+              </div>
+              
+              <div className="bg-neutral-900/50 border border-yellow-600/20 rounded-xl p-6">
+                <div className="flex justify-center mb-3">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <p className="text-gray-300 text-sm mb-3">"This system actually works!"</p>
+                <p className="text-gray-500 text-xs">- Maya T.</p>
+              </div>
+            </div>
+
+            {/* Final CTA */}
+            <div className="bg-gradient-to-r from-yellow-600/20 to-yellow-500/10 border border-yellow-600/30 rounded-2xl p-8">
+              <h3 className="text-3xl font-bold text-white mb-4">Ready to Transform Your Life?</h3>
+              <p className="text-xl text-gray-300 mb-6">Join 10,000+ high achievers who chose success</p>
+              
+              <div className="flex items-center justify-center space-x-4 mb-6">
+                <div className="text-4xl font-bold text-yellow-400">£19.99</div>
+                <div className="text-gray-500 line-through text-xl">£39.99</div>
+                <div className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">50% OFF</div>
+              </div>
+              
+              <Link href="/dashboard" className="block max-w-md mx-auto">
+                <Button size="lg" className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-bold text-xl py-6 mb-4">
+                  🚀 GET LEVERAGE JOURNAL™ NOW
                 </Button>
               </Link>
               
-              <div className="flex items-center justify-center space-x-8 text-sm text-gray-400">
-                <div className="flex items-center space-x-2">
-                  <Shield className="w-4 h-4" />
-                  <span>30-Day Money-Back Guarantee</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Users className="w-4 h-4" />
-                  <span>10,000+ Happy Customers</span>
-                </div>
-              </div>
+              <p className="text-sm text-gray-400">✅ Free Shipping • ✅ 30-Day Guarantee • ✅ Instant Access</p>
+              <p className="text-xs text-red-400 font-medium mt-2">⚡ Only 127 left at this price!</p>
             </div>
           </div>
         </LazySection>
+
 
         {/* Internal Links */}
         <LazySection>
