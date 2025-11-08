@@ -2,344 +2,342 @@
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Star, CheckCircle, ArrowRight, Users, Shield, Trophy, Brain, Target } from 'lucide-react';
+import { BookOpen, Target, TrendingUp, Zap, Star, ArrowRight, CheckCircle, User, LogOut, Clock, Trophy, Smartphone, Calendar, Shield, Truck, MessageCircle, X } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
-import CountdownTimer from '@/components/CountdownTimer';
+import { useState, useEffect } from 'react';
+import ProductMockup from '@/components/ProductMockup';
 
-export default function HomePage() {
+export default function Home() {
+  const { user, loading, signOut } = useAuth();
+  const [showExitIntent, setShowExitIntent] = useState(false);
+  const [showChatWidget, setShowChatWidget] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+
+  // Exit intent detection
+  useEffect(() => {
+    const handleMouseLeave = (e: MouseEvent) => {
+      if (e.clientY <= 0 && !user) {
+        setShowExitIntent(true);
+      }
+    };
+    document.addEventListener('mouseleave', handleMouseLeave);
+    return () => document.removeEventListener('mouseleave', handleMouseLeave);
+  }, [user]);
+
+  // Scroll tracking for animations
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Limited Edition Banner */}
-      <div className="bg-gradient-to-r from-yellow-600 to-yellow-500 text-black text-center py-3 text-sm font-medium">
-        <div className="flex items-center justify-center space-x-6">
-          <span className="font-bold">🔥 LIMITED EDITION</span>
-          <span>Offer ends in: <CountdownTimer /></span>
-          <span>Only <span className="font-bold">127/500</span> left</span>
-          <span className="hidden sm:inline">✈️ FREE Worldwide Shipping</span>
+    <div className="min-h-screen bg-black text-white relative overflow-x-hidden">
+      {/* Preheader - Announcement Bar */}
+      <div className="fixed top-0 left-0 right-0 z-[60] bg-gradient-to-r from-red-600 via-red-500 to-red-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 py-2">
+          <div className="flex items-center justify-center space-x-4 text-sm font-medium">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+              <span className="font-bold">🔥 LIMITED TIME:</span>
+            </div>
+            <span>50% OFF Pre-Order - Only £19.99 (Usually £39.99)</span>
+            <div className="hidden md:flex items-center space-x-2">
+              <Clock className="w-4 h-4" />
+              <span className="font-bold">Ships in 2-3 weeks</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <span>✅ 30-Day Guarantee</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="bg-black border-b border-yellow-600/30 sticky top-0 z-40 backdrop-blur-xl">
+      {/* Enhanced Header */}
+      <nav className="fixed top-10 left-0 right-0 z-50 bg-black/95 backdrop-blur-xl border-b border-yellow-600/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center py-4">
+            {/* Logo */}
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-lg flex items-center justify-center">
-                <span className="text-black font-bold text-lg">L</span>
+              <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center shadow-lg">
+                <BookOpen className="w-6 h-6 text-black" />
               </div>
               <div>
-                <div className="text-xl font-bold text-yellow-400">Leverage Journal™</div>
-                <div className="text-xs text-gray-400 uppercase tracking-wider">PLAN • DO • ACHIEVE</div>
+                <span className="text-2xl font-bold bg-gradient-to-r from-yellow-200 to-yellow-400 bg-clip-text text-transparent">
+                  Leverage Journal™
+                </span>
+                <div className="text-xs text-gray-400 tracking-wider">90-DAY TRANSFORMATION</div>
               </div>
             </div>
-            
+
+            {/* Navigation */}
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-gray-300 hover:text-yellow-400 transition-colors">Features</a>
-              <a href="#how-it-works" className="text-gray-300 hover:text-yellow-400 transition-colors">How It Works</a>
-              <a href="#reviews" className="text-gray-300 hover:text-yellow-400 transition-colors">Reviews</a>
-              <a href="/faq" className="text-gray-300 hover:text-yellow-400 transition-colors">FAQ</a>
-              <div className="flex items-center space-x-2">
-                <span className="text-yellow-400 font-bold">4.9</span>
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
-                  ))}
-                </div>
+              <a href="#how-it-works" className="text-gray-300 hover:text-yellow-400 transition-colors font-medium">
+                How It Works
+              </a>
+              <a href="#features" className="text-gray-300 hover:text-yellow-400 transition-colors font-medium">
+                Features
+              </a>
+              <a href="#testimonials" className="text-gray-300 hover:text-yellow-400 transition-colors font-medium">
+                Reviews
+              </a>
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-full px-3 py-1">
+                <span className="text-yellow-400 font-bold">£19.99</span>
+                <span className="text-gray-400 text-sm ml-1 line-through">£39.99</span>
               </div>
             </div>
-            
+
+            {/* Enhanced CTA Section */}
             <div className="flex items-center space-x-4">
-              <div className="hidden sm:flex items-center space-x-3 text-sm text-gray-300">
-                <span>Sign In</span>
-                <span>|</span>
-                <span>Sign Up</span>
-              </div>
-              <Button className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-semibold px-6">
-                Pre-Order Now
+              {!loading && (
+                <>
+                  {user ? (
+                    <Button variant="ghost" size="sm" onClick={signOut} className="text-gray-300 hover:text-red-400">
+                      <LogOut className="w-4 h-4 mr-1" />
+                      Sign Out
+                    </Button>
+                  ) : (
+                    <>
+                      <Link href="/auth/signin">
+                        <Button variant="ghost" className="text-gray-300 hover:text-yellow-400 hover:bg-yellow-500/10 transition-all duration-300">
+                          Sign In
+                        </Button>
+                      </Link>
+                      <Link href="/auth/signup">
+                        <Button className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-bold px-4 py-2 transition-all duration-300 hover:scale-105">
+                          Sign Up
+                        </Button>
+                      </Link>
+                    </>
+                  )}
+                </>
+              )}
+              <Button className="relative bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-bold shadow-2xl shadow-yellow-600/40 transition-all duration-300 hover:scale-105 hover:shadow-yellow-500/60 group overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <span className="relative flex items-center space-x-2">
+                  <span>Pre-Order Now</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                </span>
               </Button>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-br from-yellow-600/5 via-transparent to-yellow-500/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left Content */}
-            <div className="space-y-8">
-              {/* Social Proof Badge */}
-              <div className="inline-flex items-center px-4 py-2 bg-yellow-600/20 border border-yellow-600/30 rounded-full text-yellow-400 text-sm font-medium">
-                <Users className="w-4 h-4 mr-2" />
-                Trusted by 10,000+ High Achievers
+      {/* Hero Section - Enhanced with Emotional Storytelling */}
+      <section className="relative min-h-screen flex items-center justify-center pt-32 pb-20">
+        {/* Enhanced Background with Parallax */}
+        <div 
+          className="absolute inset-0 bg-gradient-to-br from-yellow-600/15 via-black to-black"
+          style={{ transform: `translateY(${scrollY * 0.5}px)` }}
+        ></div>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-yellow-600/10 via-transparent to-transparent"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-16 items-center">
+          {/* Enhanced Content with Pain Points */}
+          <div className="text-center lg:text-left space-y-8">
+            {/* Trust Badge */}
+            <div className="inline-flex items-center space-x-2 bg-yellow-500/10 border border-yellow-500/30 rounded-full px-4 py-2 animate-pulse">
+              <div className="flex items-center space-x-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                ))}
               </div>
+              <span className="text-yellow-200 text-sm font-medium">Trusted by 10,000+ achievers</span>
+            </div>
 
-              {/* Main Headline */}
-              <div className="space-y-6">
-                <h1 className="text-5xl lg:text-6xl font-bold text-white leading-tight">
-                  The
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600"> Leverage</span>
-                  <br />
-                  Journal
+            {/* Emotional Headline with Pain Point */}
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <p className="text-lg text-red-300 font-medium">
+                  Tired of setting goals that never stick? 😔
+                </p>
+                <h1 className="text-5xl md:text-7xl font-bold leading-tight">
+                  <span className="block bg-gradient-to-r from-yellow-200 to-yellow-400 bg-clip-text text-transparent">
+                    LEVERAGE
+                  </span>
+                  <span className="block bg-gradient-to-r from-yellow-300 to-yellow-200 bg-clip-text text-transparent">
+                    JOURNAL™
+                  </span>
                 </h1>
-                <p className="text-xl text-gray-300 leading-relaxed">
-                  Transform your biggest goals into systematic wins with the proven 90-day achievement system.
+                <div className="space-y-2">
+                  <p className="text-2xl text-yellow-100 font-light">Transform Your Life in 90 Days</p>
+                  <div className="w-24 h-1 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Enhanced Value Proposition with Emotional Benefits */}
+            <div className="space-y-4">
+              <p className="text-xl text-gray-100 max-w-xl leading-relaxed">
+                Stop feeling <span className="text-red-300 font-semibold">overwhelmed and scattered</span>. 
+                The <span className="text-yellow-300 font-semibold">only system</span> that combines 
+                psychology-backed planning with real-time app sync to turn your 
+                <span className="text-yellow-300 font-semibold"> dreams into reality</span>.
+              </p>
+              
+              {/* Pain Points Addressed */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                <div className="flex items-center space-x-2 text-gray-300">
+                  <X className="w-4 h-4 text-red-400" />
+                  <span className="line-through">Forgotten goals</span>
+                </div>
+                <div className="flex items-center space-x-2 text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Systematic achievement</span>
+                </div>
+                <div className="flex items-center space-x-2 text-gray-300">
+                  <X className="w-4 h-4 text-red-400" />
+                  <span className="line-through">Lack of accountability</span>
+                </div>
+                <div className="flex items-center space-x-2 text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Daily progress tracking</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Enhanced Stats with Social Proof */}
+            <div className="grid grid-cols-3 gap-6 py-6">
+              <div className="text-center group">
+                <div className="text-3xl font-bold text-yellow-400 group-hover:scale-110 transition-transform duration-300">94%</div>
+                <div className="text-sm text-gray-400">Success Rate</div>
+                <div className="text-xs text-green-400 mt-1">↑ Industry Leading</div>
+              </div>
+              <div className="text-center group">
+                <div className="text-3xl font-bold text-yellow-400 group-hover:scale-110 transition-transform duration-300">10K+</div>
+                <div className="text-sm text-gray-400">Lives Changed</div>
+                <div className="text-xs text-green-400 mt-1">↑ Growing Daily</div>
+              </div>
+              <div className="text-center group">
+                <div className="text-3xl font-bold text-yellow-400 group-hover:scale-110 transition-transform duration-300">4.9★</div>
+                <div className="text-sm text-gray-400">User Rated</div>
+                <div className="text-xs text-green-400 mt-1">↑ Verified Reviews</div>
+              </div>
+            </div>
+
+            {/* Enhanced CTA with Urgency */}
+            <div className="space-y-6">
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-600 rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
+                <Button
+                  size="lg"
+                  className="relative bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-bold text-lg px-12 py-6 shadow-2xl hover:scale-105 transition-all duration-300 w-full lg:w-auto"
+                >
+                  <span className="flex items-center justify-center">
+                    🚀 START YOUR TRANSFORMATION - £19.99
+                    <ArrowRight className="ml-3 w-5 h-5 group-hover:translate-x-2 transition-transform" />
+                  </span>
+                </Button>
+              </div>
+              
+              <div className="text-center lg:text-left space-y-4">
+                <div className="inline-flex items-center space-x-2 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-2 animate-bounce">
+                  <Clock className="w-4 h-4 text-red-400" />
+                  <span className="text-red-200 font-bold">⏰ Only 48 Hours Left: 50% OFF</span>
+                </div>
+                <div className="flex flex-wrap justify-center lg:justify-start gap-6 text-sm">
+                  <div className="flex items-center space-x-2 bg-green-500/10 border border-green-500/30 rounded-lg px-3 py-2">
+                    <Shield className="w-4 h-4 text-green-400" />
+                    <span className="text-green-200 font-medium">30-Day Money-Back Guarantee</span>
+                  </div>
+                  <div className="flex items-center space-x-2 bg-blue-500/10 border border-blue-500/30 rounded-lg px-3 py-2">
+                    <Truck className="w-4 h-4 text-blue-400" />
+                    <span className="text-blue-200 font-medium">Free Worldwide Shipping</span>
+                  </div>
+                  <div className="flex items-center space-x-2 bg-purple-500/10 border border-purple-500/30 rounded-lg px-3 py-2">
+                    <Smartphone className="w-4 h-4 text-purple-400" />
+                    <span className="text-purple-200 font-medium">Premium App Included</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Stunning Product Mockup */}
+          <div className="relative hidden lg:flex items-center justify-center">
+            <ProductMockup />
+          </div>
+        </div>
+      </section>
+
+      {/* Exit Intent Popup */}
+      {showExitIntent && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-gradient-to-br from-neutral-900 to-black border border-yellow-600/30 rounded-3xl p-8 max-w-md w-full relative">
+            <button
+              onClick={() => setShowExitIntent(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            
+            <div className="text-center space-y-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center mx-auto">
+                <Trophy className="w-8 h-8 text-black" />
+              </div>
+              
+              <div>
+                <h3 className="text-2xl font-bold text-white mb-2">Wait! Don't Miss Out</h3>
+                <p className="text-gray-300">
+                  Join 10,000+ people transforming their lives. Get your Leverage Journal for just £19.99 (50% off).
                 </p>
               </div>
-
-              {/* Key Benefits */}
-              <div className="bg-gradient-to-r from-yellow-600/10 to-yellow-500/10 border border-yellow-600/20 rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-yellow-400 font-bold text-lg">LIMITED TIME OFFER</span>
-                  <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">50% OFF</span>
-                </div>
-                
-                <div className="grid md:grid-cols-2 gap-3">
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-400" />
-                    <span className="text-white">Physical Journal + App</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-400" />
-                    <span className="text-white">AI Success Coaching</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-400" />
-                    <span className="text-white">Psychology-Backed System</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-green-400" />
-                    <span className="text-white">30-Day Guarantee</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Pricing & CTA */}
-              <div className="space-y-6">
-                <div className="flex items-baseline space-x-4">
-                  <div className="text-5xl font-bold text-yellow-400">£19.99</div>
-                  <div className="space-x-2">
-                    <span className="line-through text-2xl text-gray-500">£39.99</span>
-                    <span className="text-green-400 font-bold">Save £20!</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <Button size="lg" className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-bold text-xl py-6 shadow-xl shadow-yellow-500/25">
-                    🚀 GET YOUR COPY NOW
-                    <ArrowRight className="w-6 h-6 ml-3" />
-                  </Button>
-                  
-                  <div className="text-center">
-                    <p className="text-sm text-gray-400 mb-2">✅ Free Shipping • ✅ 30-Day Guarantee • ✅ Instant Access</p>
-                    <p className="text-xs text-red-400 font-medium">⚡ Only 127 left at this price!</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Content - Product Showcase */}
-            <div className="relative">
-              <div className="bg-gradient-to-br from-yellow-600 to-yellow-500 rounded-3xl p-8 text-black shadow-2xl shadow-yellow-500/25">
-                <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold mb-2">LEVERAGE JOURNAL™</h3>
-                  <p className="text-yellow-900">90-Day Transformation System</p>
-                </div>
-                
-                <div className="space-y-6">
-                  <div className="bg-black/10 rounded-xl p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Progress</span>
-                      <span className="text-sm font-medium">Day 23/90</span>
-                    </div>
-                    <div className="h-2 bg-black/20 rounded-full">
-                      <div className="h-full w-1/4 bg-black rounded-full"></div>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-black/10 rounded-lg p-3 text-center">
-                      <div className="text-black font-bold">94%</div>
-                      <div className="text-xs text-yellow-900">Success Rate</div>
-                    </div>
-                    <div className="bg-black/10 rounded-lg p-3 text-center">
-                      <div className="text-black font-bold">8/12</div>
-                      <div className="text-xs text-yellow-900">Goals</div>
-                    </div>
-                    <div className="bg-black/10 rounded-lg p-3 text-center">
-                      <div className="text-black font-bold">23</div>
-                      <div className="text-xs text-yellow-900">Streak</div>
-                    </div>
-                  </div>
-                </div>
+              
+              <div className="space-y-3">
+                <Button className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-bold">
+                  Claim My 50% Discount Now
+                </Button>
+                <p className="text-xs text-gray-400">
+                  ⏰ This offer expires in 24 hours
+                </p>
               </div>
             </div>
           </div>
         </div>
-      </section>
+      )}
 
-      {/* Social Proof Section */}
-      <section className="py-16 bg-neutral-900/50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              <div>
-                <div className="text-4xl font-bold text-yellow-400">10K+</div>
-                <div className="text-gray-400 text-sm">Success Stories</div>
-              </div>
-              <div>
-                <div className="text-4xl font-bold text-green-400">94%</div>
-                <div className="text-gray-400 text-sm">Achievement Rate</div>
-              </div>
-              <div>
-                <div className="text-4xl font-bold text-blue-400">90</div>
-                <div className="text-gray-400 text-sm">Days to Transform</div>
-              </div>
-              <div>
-                <div className="text-4xl font-bold text-yellow-400">4.9★</div>
-                <div className="text-gray-400 text-sm">User Rating</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Features */}
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="p-6 text-center bg-neutral-800/50 border border-yellow-600/20 shadow-lg">
-              <div className="w-12 h-12 bg-yellow-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Brain className="w-6 h-6 text-yellow-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">Science-Backed</h3>
-              <p className="text-gray-300">Psychology + AI = Guaranteed Results</p>
-            </Card>
-            
-            <Card className="p-6 text-center bg-neutral-800/50 border border-yellow-600/20 shadow-lg">
-              <div className="w-12 h-12 bg-green-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Target className="w-6 h-6 text-green-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">90-Day System</h3>
-              <p className="text-gray-300">Proven timeframe for lasting change</p>
-            </Card>
-            
-            <Card className="p-6 text-center bg-neutral-800/50 border border-yellow-600/20 shadow-lg">
-              <div className="w-12 h-12 bg-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Trophy className="w-6 h-6 text-blue-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">Proven Results</h3>
-              <p className="text-gray-300">10,000+ successful transformations</p>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-16 bg-black">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-white mb-8">
-            What Our <span className="text-yellow-400">10,000+</span> Users Say
-          </h2>
-
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
-            <Card className="p-6 bg-neutral-900/50 border border-yellow-600/20 shadow-lg">
-              <div className="flex justify-center mb-3">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
-                ))}
-              </div>
-              <p className="text-gray-300 mb-3">"Doubled my productivity in 30 days!"</p>
-              <p className="text-gray-500 text-sm">- Sarah M.</p>
-            </Card>
-            
-            <Card className="p-6 bg-neutral-900/50 border border-yellow-600/20 shadow-lg">
-              <div className="flex justify-center mb-3">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
-                ))}
-              </div>
-              <p className="text-gray-300 mb-3">"Finally achieved my 5-year goal!"</p>
-              <p className="text-gray-500 text-sm">- James P.</p>
-            </Card>
-            
-            <Card className="p-6 bg-neutral-900/50 border border-yellow-600/20 shadow-lg">
-              <div className="flex justify-center mb-3">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
-                ))}
-              </div>
-              <p className="text-gray-300 mb-3">"This system actually works!"</p>
-              <p className="text-gray-500 text-sm">- Maya T.</p>
-            </Card>
-          </div>
-
-          {/* Final CTA */}
-          <Card className="p-8 bg-gradient-to-r from-yellow-600 to-yellow-500 text-black border-0 shadow-2xl shadow-yellow-500/25">
-            <h3 className="text-3xl font-bold mb-4">Ready to Transform Your Life?</h3>
-            <p className="text-xl text-yellow-900 mb-6">Join 10,000+ high achievers who chose success</p>
-            
-            <div className="flex items-center justify-center space-x-4 mb-6">
-              <div className="text-4xl font-bold text-black">£19.99</div>
-              <div className="text-yellow-800 line-through text-xl">£39.99</div>
-              <div className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">50% OFF</div>
-            </div>
-            
-            <Button size="lg" className="bg-black text-yellow-400 hover:bg-gray-900 font-bold text-xl py-6 px-12 mb-4">
-              🚀 GET LEVERAGE JOURNAL™ NOW
-            </Button>
-            
-            <p className="text-sm text-yellow-900">✅ Free Shipping • ✅ 30-Day Guarantee • ✅ Instant Access</p>
-            <p className="text-xs text-red-600 font-medium mt-2">⚡ Only 127 left at this price!</p>
-          </Card>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-neutral-900 border-t border-yellow-600/20 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-lg flex items-center justify-center">
-                  <span className="text-black font-bold">L</span>
+      {/* Live Chat Widget */}
+      <div className="fixed bottom-6 right-6 z-50">
+        {showChatWidget ? (
+          <div className="bg-gradient-to-br from-neutral-900 to-black border border-yellow-600/30 rounded-2xl p-4 w-80 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center">
+                  <MessageCircle className="w-4 h-4 text-black" />
                 </div>
-                <span className="text-xl font-bold text-yellow-400">Leverage Journal™</span>
+                <div>
+                  <h4 className="text-white font-semibold text-sm">Live Support</h4>
+                  <p className="text-green-400 text-xs">Online now</p>
+                </div>
               </div>
-              <p className="text-gray-400 text-sm">
-                Transform your goals into systematic success with the ultimate 90-day achievement system.
-              </p>
+              <button onClick={() => setShowChatWidget(false)} className="text-gray-400 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
             </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4 text-yellow-400">Product</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#features" className="hover:text-yellow-400">Features</a></li>
-                <li><a href="#how-it-works" className="hover:text-yellow-400">How It Works</a></li>
-                <li><a href="/faq" className="hover:text-yellow-400">FAQ</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4 text-yellow-400">Legal</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="/privacy" className="hover:text-yellow-400">Privacy Policy</a></li>
-                <li><a href="/terms" className="hover:text-yellow-400">Terms of Service</a></li>
-                <li><a href="/cookies" className="hover:text-yellow-400">Cookie Policy</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4 text-yellow-400">Support</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="mailto:support@leveragejournal.com" className="hover:text-yellow-400">Contact Us</a></li>
-                <li><a href="#" className="hover:text-yellow-400">Help Center</a></li>
-                <li><a href="#" className="hover:text-yellow-400">Shipping Info</a></li>
-              </ul>
+            <div className="space-y-3">
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
+                <p className="text-yellow-200 text-sm">
+                  Hi! 👋 Questions about the Leverage Journal? I'm here to help!
+                </p>
+              </div>
+              <input
+                type="text"
+                placeholder="Type your message..."
+                className="w-full bg-neutral-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-yellow-500"
+              />
             </div>
           </div>
-          
-          <div className="border-t border-yellow-600/20 mt-8 pt-8 text-center text-sm text-gray-400">
-            <p>&copy; 2024 Leverage Journal™. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+        ) : (
+          <button
+            onClick={() => setShowChatWidget(true)}
+            className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black p-4 rounded-full shadow-2xl hover:scale-110 transition-all duration-300 group"
+          >
+            <MessageCircle className="w-6 h-6 group-hover:scale-110 transition-transform" />
+          </button>
+        )}
+      </div>
     </div>
   );
 }
