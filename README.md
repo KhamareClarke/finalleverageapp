@@ -1,6 +1,6 @@
 # Leverage Journal™ - 90-Day Transformation System
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/leveragejournal/leveragejournal)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/KhamareClarke/leveragejournel)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-13.5.1-black.svg)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
@@ -29,8 +29,8 @@
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/leveragejournal/leveragejournal.git
-   cd leveragejournal
+   git clone https://github.com/KhamareClarke/leveragejournel.git
+   cd leveragejournel
    ```
 
 2. **Install dependencies**
@@ -176,8 +176,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Documentation**: [docs.leveragejournal.com](https://docs.leveragejournal.com)
 - **Support Email**: [support@leveragejournal.com](mailto:support@leveragejournal.com)
-- **Issues**: [GitHub Issues](https://github.com/leveragejournal/leveragejournal/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/leveragejournal/leveragejournal/discussions)
+- **Issues**: [GitHub Issues](https://github.com/KhamareClarke/leveragejournel/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/KhamareClarke/leveragejournel/discussions)
 
 ## 🏆 Success Stories
 
