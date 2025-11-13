@@ -539,7 +539,7 @@ const GoalsTab = memo(function GoalsTab({ preloadedData }: { preloadedData?: any
   const { user } = useAuth();
   const router = useRouter();
   // Use preloaded data directly - instant rendering
-  const goalsList = useMemo(() => preloadedData?.goals || [], [preloadedData?.goals]);
+  const [goalsList, setGoalsList] = useState(() => preloadedData?.goals || []);
   const [today, setToday] = useState(() => {
     if (typeof window !== 'undefined') {
       const now = new Date();
@@ -563,13 +563,12 @@ const GoalsTab = memo(function GoalsTab({ preloadedData }: { preloadedData?: any
 
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // Use preloaded data only on initial mount
+  // Use preloaded data when available
   useEffect(() => {
-    if (preloadedData?.goals && goalsList.length === 0) {
-      setGoalsList(preloadedData.goals);
+    if (preloadedData?.goals !== undefined) {
+      setGoalsList(preloadedData.goals || []);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount
+  }, [preloadedData]);
 
   // Load all goals if not preloaded
   useEffect(() => {
