@@ -76,6 +76,16 @@ function GoalsPageContent() {
     }
   }, []);
 
+  // Redirect to sign-in if not authenticated - MUST be after all hooks
+  useEffect(() => {
+    if (!authLoading && !user) {
+      // Use window.location for immediate redirect to prevent blank page
+      if (typeof window !== 'undefined') {
+        window.location.href = '/auth/signin';
+      }
+    }
+  }, [user, authLoading]);
+
   const [formData, setFormData] = useState<Goal>({
     title: '',
     description: '',

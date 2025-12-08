@@ -32,6 +32,16 @@ function ReviewPageContent() {
   const [weekStartStr, setWeekStartStr] = useState<string>('');
   const [weekEndStr, setWeekEndStr] = useState<string>('');
 
+  // Redirect to sign-in if not authenticated - MUST be after all hooks
+  useEffect(() => {
+    if (!authLoading && !user) {
+      // Use window.location for immediate redirect to prevent blank page
+      if (typeof window !== 'undefined') {
+        window.location.href = '/auth/signin';
+      }
+    }
+  }, [user, authLoading]);
+
   // Format dates as YYYY-MM-DD using local timezone
   const formatLocalDate = (date: Date): string => {
     const year = date.getFullYear();
