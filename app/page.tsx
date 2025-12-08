@@ -403,9 +403,27 @@ export default function Home() {
               </div>
               
               <div className="space-y-3">
-                <Button className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-bold">
+                <Button 
+                  onClick={() => {
+                    // Close popup when button is clicked (user can navigate from there)
+                    setShowExitIntent(false);
+                    localStorage.setItem('exit-intent-dismissed', 'true');
+                    localStorage.setItem('exit-intent-dismissed-time', Date.now().toString());
+                  }}
+                  className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-bold"
+                >
                   Claim My 50% Discount Now
                 </Button>
+                <button
+                  onClick={() => {
+                    setShowExitIntent(false);
+                    localStorage.setItem('exit-intent-dismissed', 'true');
+                    localStorage.setItem('exit-intent-dismissed-time', Date.now().toString());
+                  }}
+                  className="text-xs text-gray-400 hover:text-gray-300 underline w-full"
+                >
+                  No thanks, I'll pass
+                </button>
                 <p className="text-xs text-gray-400">
                   ⏰ This offer expires in 24 hours
                 </p>
