@@ -52,9 +52,20 @@ export default function SignIn() {
       // The dashboard will handle loading states
       const redirect = searchParams.get('redirect') || searchParams.get('next');
       
-      // Redirect to the originally requested page, or dashboard as fallback
+      // Validate redirect URL and redirect to the originally requested page
       if (redirect) {
-        router.push(redirect);
+        // Validate that the redirect path is safe (starts with / and doesn't contain dangerous characters)
+        const safeRedirect = redirect.startsWith('/') && !redirect.includes('//') && !redirect.includes('javascript:') && !redirect.includes('data:')
+          ? redirect
+          : null;
+        
+        if (safeRedirect) {
+          // Try to navigate to the requested page
+          router.push(safeRedirect);
+        } else {
+          // Invalid redirect, go to dashboard
+          router.push('/dashboard');
+        }
       } else {
         router.push('/dashboard');
       }

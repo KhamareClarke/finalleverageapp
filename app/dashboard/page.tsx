@@ -84,6 +84,7 @@ const DailyFlowTab = memo(function DailyFlowTab({ preloadedData }: { preloadedDa
   }, [todayEntry, preloadedData?.journalList, today]);
 
   const handleGoToJournal = () => {
+    // Navigate to the daily journal entry page
     router.push('/dashboard/daily');
   };
 
