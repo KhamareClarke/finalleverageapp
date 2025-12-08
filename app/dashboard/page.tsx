@@ -1348,7 +1348,7 @@ export default function Dashboard() {
     }
   }, [searchParams, activeTab]);
 
-  // Redirect to sign-in if not authenticated
+  // Redirect to sign-in if not authenticated - MUST happen before any content renders
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/auth/signin?redirect=/dashboard');
@@ -1367,6 +1367,22 @@ export default function Dashboard() {
       return () => clearTimeout(timeout);
     }
   }, [authLoading, router]);
+
+  // Early return - don't render anything if not authenticated or still loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // Will redirect via useEffect
+  }
 
   // Preload all data on mount (must be before any conditional returns)
   useEffect(() => {

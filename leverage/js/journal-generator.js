@@ -1904,6 +1904,7 @@ function initializeInteractiveElements() {
 }
 
 // Generate QR codes for journal pages
+// Uses current domain (window.location.origin) so QR codes work on any domain
 function generateQRCodes() {
     function attemptQRGeneration(retries = 5) {
         const qrChapter1 = document.getElementById('qr-code-chapter1');
@@ -1931,231 +1932,57 @@ function generateQRCodes() {
             chapter5: !!qrChapter5
         });
         
-        // Check if QRCode library is loaded
-        if (typeof QRCode === 'undefined') {
-            if (retries > 0) {
-                console.log('Waiting for QRCode library to load...');
-                setTimeout(() => attemptQRGeneration(retries - 1), 300);
-            } else {
-                console.error('❌ QRCode library failed to load after retries');
-                // Use fallback for all chapters
-                if (qrChapter1) {
-                    const currentOrigin = window.location.origin;
-                    const targetUrl = `${currentOrigin}/dashboard/goals`;
-                    const qrData = encodeURIComponent(targetUrl);
-                    const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${qrData}&bgcolor=FFFFFF&color=000000`;
-                    qrChapter1.innerHTML = `<img src="${qrApiUrl}" alt="QR Code" style="width: 100px; height: 100px; border-radius: 8px; display: block;" />`;
-                }
-                if (qrChapter2) {
-                    const currentOrigin = window.location.origin;
-                    const targetUrl = `${currentOrigin}/dashboard/daily`;
-                    const qrData = encodeURIComponent(targetUrl);
-                    const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${qrData}&bgcolor=FFFFFF&color=000000`;
-                    qrChapter2.innerHTML = `<img src="${qrApiUrl}" alt="QR Code" style="width: 100px; height: 100px; border-radius: 8px; display: block;" />`;
-                }
-                if (qrChapter3) {
-                    const currentOrigin = window.location.origin;
-                    const targetUrl = `${currentOrigin}/dashboard`;
-                    const qrData = encodeURIComponent(targetUrl);
-                    const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${qrData}&bgcolor=FFFFFF&color=000000`;
-                    qrChapter3.innerHTML = `<img src="${qrApiUrl}" alt="QR Code" style="width: 100px; height: 100px; border-radius: 8px; display: block;" />`;
-                }
-                if (qrChapter4) {
-                    const currentOrigin = window.location.origin;
-                    const targetUrl = `${currentOrigin}/dashboard?tab=stats`;
-                    const qrData = encodeURIComponent(targetUrl);
-                    const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${qrData}&bgcolor=FFFFFF&color=000000`;
-                    qrChapter4.innerHTML = `<img src="${qrApiUrl}" alt="QR Code" style="width: 100px; height: 100px; border-radius: 8px; display: block;" />`;
-                }
-                if (qrChapter5) {
-                    const currentOrigin = window.location.origin;
-                    const targetUrl = `${currentOrigin}/dashboard`;
-                    const qrData = encodeURIComponent(targetUrl);
-                    const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${qrData}&bgcolor=FFFFFF&color=000000`;
-                    qrChapter5.innerHTML = `<img src="${qrApiUrl}" alt="QR Code" style="width: 100px; height: 100px; border-radius: 8px; display: block;" />`;
-                }
-            }
-            return;
-        }
+        // Use current origin so QR codes work on any domain
+        const currentOrigin = window.location.origin;
         
-        // Library is loaded, generate QR code for Chapter 1
+        // QR code URLs using current domain
+        const qrUrls = {
+            chapter1: `${currentOrigin}/dashboard/goals`,
+            chapter2: `${currentOrigin}/dashboard/daily`,
+            chapter3: `${currentOrigin}/dashboard`,
+            chapter4: `${currentOrigin}/dashboard?tab=stats`,
+            chapter5: `${currentOrigin}/dashboard`
+        };
+        
+        // Generate QR codes using API - works with current domain
         if (qrChapter1) {
-            const currentOrigin = window.location.origin;
-            const qrUrl = `${currentOrigin}/dashboard/goals`;
-            console.log('Generating QR code for Chapter 1:', qrUrl);
-            
-            const canvas = document.createElement('canvas');
-            qrChapter1.appendChild(canvas);
-            
-            QRCode.toCanvas(canvas, qrUrl.trim(), {
-                width: 100,
-                margin: 2,
-                color: {
-                    dark: '#000000',
-                    light: '#FFFFFF'
-                },
-                errorCorrectionLevel: 'H'
-            }, function (error) {
-                if (error) {
-                    console.error('Error generating QR code for Chapter 1:', error);
-                    qrChapter1.removeChild(canvas);
-                    const currentOrigin = window.location.origin;
-                    const targetUrl = `${currentOrigin}/dashboard/goals`;
-                    const qrData = encodeURIComponent(targetUrl);
-                    const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${qrData}&bgcolor=FFFFFF&color=000000`;
-                    qrChapter1.innerHTML = `<img src="${qrApiUrl}" alt="QR Code" style="width: 100px; height: 100px; border-radius: 8px; display: block;" />`;
-                } else {
-                    canvas.style.borderRadius = '8px';
-                    canvas.style.width = '100px';
-                    canvas.style.height = '100px';
-                    canvas.style.display = 'block';
-                    console.log('✅ QR code generated successfully for Chapter 1. URL:', qrUrl);
-                }
-            });
+            const targetUrl = qrUrls.chapter1;
+            const qrData = encodeURIComponent(targetUrl);
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${qrData}&bgcolor=FFFFFF&color=000000&margin=1&ecc=H`;
+            qrChapter1.innerHTML = `<a href="${targetUrl}" target="_blank" rel="noopener noreferrer"><img src="${qrApiUrl}" alt="QR Code - Access Vision Board" style="width: 100px; height: 100px; border-radius: 8px; display: block; cursor: pointer;" /></a>`;
+            console.log('✅ QR code generated for Chapter 1:', targetUrl);
         }
         
-        // Generate QR code for Chapter 2
         if (qrChapter2) {
-            const currentOrigin2 = window.location.origin;
-            const qrUrl2 = `${currentOrigin2}/dashboard/daily`;
-            console.log('Generating QR code for Chapter 2:', qrUrl2);
-            
-            const canvas2 = document.createElement('canvas');
-            qrChapter2.appendChild(canvas2);
-            
-            QRCode.toCanvas(canvas2, qrUrl2.trim(), {
-                width: 150,
-                margin: 3,
-                color: {
-                    dark: '#000000',
-                    light: '#FFFFFF'
-                },
-                errorCorrectionLevel: 'H'
-            }, function (error) {
-                if (error) {
-                    console.error('Error generating QR code for Chapter 2:', error);
-                    qrChapter2.removeChild(canvas2);
-                    const currentOrigin2 = window.location.origin;
-                    const targetUrl2 = `${currentOrigin2}/dashboard/daily`;
-                    const qrData2 = encodeURIComponent(targetUrl2);
-                    const qrApiUrl2 = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${qrData2}&bgcolor=FFFFFF&color=000000`;
-                    qrChapter2.innerHTML = `<img src="${qrApiUrl2}" alt="QR Code" style="width: 100px; height: 100px; border-radius: 8px; display: block;" />`;
-                } else {
-                    canvas2.style.borderRadius = '8px';
-                    canvas2.style.width = '150px';
-                    canvas2.style.height = '150px';
-                    canvas2.style.display = 'block';
-                    console.log('✅ QR code generated successfully for Chapter 2. URL:', qrUrl2);
-                }
-            });
+            const targetUrl = qrUrls.chapter2;
+            const qrData = encodeURIComponent(targetUrl);
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${qrData}&bgcolor=FFFFFF&color=000000&margin=1&ecc=H`;
+            qrChapter2.innerHTML = `<a href="${targetUrl}" target="_blank" rel="noopener noreferrer"><img src="${qrApiUrl}" alt="QR Code - Access Plan Dashboard" style="width: 150px; height: 150px; border-radius: 8px; display: block; cursor: pointer;" /></a>`;
+            console.log('✅ QR code generated for Chapter 2:', targetUrl);
         }
         
-        // Generate QR code for Chapter 3
         if (qrChapter3) {
-            const currentOrigin3 = window.location.origin;
-            const qrUrl3 = `${currentOrigin3}/dashboard`;
-            console.log('Generating QR code for Chapter 3:', qrUrl3);
-            
-            const canvas3 = document.createElement('canvas');
-            qrChapter3.appendChild(canvas3);
-            
-            QRCode.toCanvas(canvas3, qrUrl3.trim(), {
-                width: 150,
-                margin: 3,
-                color: {
-                    dark: '#000000',
-                    light: '#FFFFFF'
-                },
-                errorCorrectionLevel: 'H'
-            }, function (error) {
-                if (error) {
-                    console.error('Error generating QR code for Chapter 3:', error);
-                    qrChapter3.removeChild(canvas3);
-                    const currentOrigin3 = window.location.origin;
-                    const targetUrl3 = `${currentOrigin3}/dashboard`;
-                    const qrData3 = encodeURIComponent(targetUrl3);
-                    const qrApiUrl3 = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${qrData3}&bgcolor=FFFFFF&color=000000`;
-                    qrChapter3.innerHTML = `<img src="${qrApiUrl3}" alt="QR Code" style="width: 100px; height: 100px; border-radius: 8px; display: block;" />`;
-                } else {
-                    canvas3.style.borderRadius = '8px';
-                    canvas3.style.width = '150px';
-                    canvas3.style.height = '150px';
-                    canvas3.style.display = 'block';
-                    console.log('✅ QR code generated successfully for Chapter 3. URL:', qrUrl3);
-                }
-            });
+            const targetUrl = qrUrls.chapter3;
+            const qrData = encodeURIComponent(targetUrl);
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${qrData}&bgcolor=FFFFFF&color=000000&margin=1&ecc=H`;
+            qrChapter3.innerHTML = `<a href="${targetUrl}" target="_blank" rel="noopener noreferrer"><img src="${qrApiUrl}" alt="QR Code - Sync with AI CoPilot" style="width: 150px; height: 150px; border-radius: 8px; display: block; cursor: pointer;" /></a>`;
+            console.log('✅ QR code generated for Chapter 3:', targetUrl);
         }
         
-        // Generate QR code for Chapter 4
         if (qrChapter4) {
-            const currentOrigin4 = window.location.origin;
-            const qrUrl4 = `${currentOrigin4}/dashboard?tab=stats`;
-            console.log('Generating QR code for Chapter 4:', qrUrl4);
-            
-            const canvas4 = document.createElement('canvas');
-            qrChapter4.appendChild(canvas4);
-            
-            QRCode.toCanvas(canvas4, qrUrl4.trim(), {
-                width: 150,
-                margin: 3,
-                color: {
-                    dark: '#000000',
-                    light: '#FFFFFF'
-                },
-                errorCorrectionLevel: 'H'
-            }, function (error) {
-                if (error) {
-                    console.error('Error generating QR code for Chapter 4:', error);
-                    qrChapter4.removeChild(canvas4);
-                    const currentOrigin4 = window.location.origin;
-                    const targetUrl4 = `${currentOrigin4}/dashboard?tab=stats`;
-                    const qrData4 = encodeURIComponent(targetUrl4);
-                    const qrApiUrl4 = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${qrData4}&bgcolor=FFFFFF&color=000000`;
-                    qrChapter4.innerHTML = `<img src="${qrApiUrl4}" alt="QR Code" style="width: 100px; height: 100px; border-radius: 8px; display: block;" />`;
-                } else {
-                    canvas4.style.borderRadius = '8px';
-                    canvas4.style.width = '150px';
-                    canvas4.style.height = '150px';
-                    canvas4.style.display = 'block';
-                    console.log('✅ QR code generated successfully for Chapter 4. URL:', qrUrl4);
-                }
-            });
+            const targetUrl = qrUrls.chapter4;
+            const qrData = encodeURIComponent(targetUrl);
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${qrData}&bgcolor=FFFFFF&color=000000&margin=1&ecc=H`;
+            qrChapter4.innerHTML = `<a href="${targetUrl}" target="_blank" rel="noopener noreferrer"><img src="${qrApiUrl}" alt="QR Code - Access Progress Analytics" style="width: 150px; height: 150px; border-radius: 8px; display: block; cursor: pointer;" /></a>`;
+            console.log('✅ QR code generated for Chapter 4:', targetUrl);
         }
         
-        // Generate QR code for Chapter 5
         if (qrChapter5) {
-            const currentOrigin5 = window.location.origin;
-            const qrUrl5 = `${currentOrigin5}/dashboard`;
-            console.log('Generating QR code for Chapter 5:', qrUrl5);
-            
-            const canvas5 = document.createElement('canvas');
-            qrChapter5.appendChild(canvas5);
-            
-            QRCode.toCanvas(canvas5, qrUrl5.trim(), {
-                width: 150,
-                margin: 3,
-                color: {
-                    dark: '#000000',
-                    light: '#FFFFFF'
-                },
-                errorCorrectionLevel: 'H'
-            }, function (error) {
-                if (error) {
-                    console.error('Error generating QR code for Chapter 5:', error);
-                    qrChapter5.removeChild(canvas5);
-                    const currentOrigin5 = window.location.origin;
-                    const targetUrl5 = `${currentOrigin5}/dashboard`;
-                    const qrData5 = encodeURIComponent(targetUrl5);
-                    const qrApiUrl5 = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${qrData5}&bgcolor=FFFFFF&color=000000`;
-                    qrChapter5.innerHTML = `<img src="${qrApiUrl5}" alt="QR Code" style="width: 100px; height: 100px; border-radius: 8px; display: block;" />`;
-                } else {
-                    canvas5.style.borderRadius = '8px';
-                    canvas5.style.width = '150px';
-                    canvas5.style.height = '150px';
-                    canvas5.style.display = 'block';
-                    console.log('✅ QR code generated successfully for Chapter 5. URL:', qrUrl5);
-                }
-            });
+            const targetUrl = qrUrls.chapter5;
+            const qrData = encodeURIComponent(targetUrl);
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${qrData}&bgcolor=FFFFFF&color=000000&margin=1&ecc=H`;
+            qrChapter5.innerHTML = `<a href="${targetUrl}" target="_blank" rel="noopener noreferrer"><img src="${qrApiUrl}" alt="QR Code - Join Builder's Guild" style="width: 150px; height: 150px; border-radius: 8px; display: block; cursor: pointer;" /></a>`;
+            console.log('✅ QR code generated for Chapter 5:', targetUrl);
         }
     }
     
