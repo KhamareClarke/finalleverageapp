@@ -54,6 +54,10 @@ export async function POST(request: NextRequest) {
     let journalSkipped = 0;
     let goalsSent = 0;
     let goalsSkipped = 0;
+    const journalSentEmails: string[] = [];
+    const journalSkippedEmails: string[] = [];
+    const goalsSentEmails: string[] = [];
+    const goalsSkippedEmails: string[] = [];
 
     // Check each user
     for (const user of users.users) {
@@ -74,12 +78,14 @@ export async function POST(request: NextRequest) {
         try {
           await sendJournalReminder(user.email, userName);
           journalSent++;
+          journalSentEmails.push(user.email);
           console.log(`✅ Sent journal reminder to ${user.email}`);
         } catch (emailError: any) {
           console.error(`❌ Failed to send journal reminder to ${user.email}:`, emailError.message);
         }
       } else {
         journalSkipped++;
+        journalSkippedEmails.push(user.email);
         console.log(`⏭️ Skipped journal reminder for ${user.email} - already has entry`);
       }
 
@@ -104,12 +110,14 @@ export async function POST(request: NextRequest) {
             goals.map(g => ({ title: g.title, progress: g.progress || 0 }))
           );
           goalsSent++;
+          goalsSentEmails.push(user.email);
           console.log(`✅ Sent goal reminder to ${user.email} (${goals.length} goals)`);
         } catch (emailError: any) {
           console.error(`❌ Failed to send goal reminder to ${user.email}:`, emailError.message);
         }
       } else {
         goalsSkipped++;
+        goalsSkippedEmails.push(user.email);
         console.log(`⏭️ Skipped goal reminder for ${user.email} - no active goals`);
       }
     }
@@ -119,10 +127,14 @@ export async function POST(request: NextRequest) {
       journal: {
         sent: journalSent,
         skipped: journalSkipped,
+        sentTo: journalSentEmails,
+        skippedFor: journalSkippedEmails,
       },
       goals: {
         sent: goalsSent,
         skipped: goalsSkipped,
+        sentTo: goalsSentEmails,
+        skippedFor: goalsSkippedEmails,
       },
       total: users.users.length,
     });
