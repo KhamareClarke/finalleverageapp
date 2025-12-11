@@ -57,7 +57,8 @@ export async function POST(request: NextRequest) {
           await sendGoalProgressReminder(
             user.email,
             userName,
-            goals.map(g => ({ title: g.title, progress: g.progress || 0 }))
+            goals.map(g => ({ title: g.title, progress: g.progress || 0 })),
+            user.id
           );
           sentCount++;
           console.log(`✅ Sent goal reminder to ${user.email} (${goals.length} goals)`);

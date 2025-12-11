@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
 
       try {
         const userName = user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0];
-        await sendTestEmail(user.email, userName);
+        await sendTestEmail(user.email, userName, user.id);
         sentCount++;
         console.log(`✅ Sent test email to ${user.email}`);
       } catch (emailError: any) {

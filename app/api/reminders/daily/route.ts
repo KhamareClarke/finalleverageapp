@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       // If no entry or entry has no content, send journal reminder
       if (!entry || !hasContent(entry)) {
         try {
-          await sendJournalReminder(user.email, userName);
+          await sendJournalReminder(user.email, userName, user.id);
           journalSent++;
           journalSentEmails.push(user.email);
           console.log(`✅ Sent journal reminder to ${user.email}`);
@@ -107,7 +107,8 @@ export async function POST(request: NextRequest) {
           await sendGoalProgressReminder(
             user.email,
             userName,
-            goals.map(g => ({ title: g.title, progress: g.progress || 0 }))
+            goals.map(g => ({ title: g.title, progress: g.progress || 0 })),
+            user.id
           );
           goalsSent++;
           goalsSentEmails.push(user.email);

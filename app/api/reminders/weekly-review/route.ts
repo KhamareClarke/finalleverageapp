@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       if (!review || reviewError) {
         try {
           const userName = user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0];
-          await sendWeeklyReviewReminder(user.email, userName, weekNumber);
+          await sendWeeklyReviewReminder(user.email, userName, weekNumber, user.id);
           sentCount++;
           console.log(`✅ Sent weekly review reminder to ${user.email} (Week ${weekNumber})`);
         } catch (emailError: any) {

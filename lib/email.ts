@@ -1,4 +1,42 @@
 import nodemailer from 'nodemailer';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+// Helper function to log emails to database
+async function logEmail(
+  email: string,
+  emailType: string,
+  subject: string,
+  recipientName: string | null,
+  userId: string | null,
+  messageId: string | null,
+  status: 'sent' | 'failed',
+  errorMessage: string | null = null,
+  metadata: any = null
+) {
+  try {
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    await supabase.from('email_logs').insert({
+      email,
+      email_type: emailType,
+      subject,
+      recipient_name: recipientName,
+      user_id: userId || null,
+      message_id: messageId,
+      status,
+      error_message: errorMessage,
+      metadata: metadata || null,
+    });
+  } catch (logError: any) {
+    // Don't throw - logging failure shouldn't break email sending
+    console.error('Failed to log email:', logError);
+  }
+}
 
 // Gmail SMTP configuration
 const transporter = nodemailer.createTransport({
@@ -22,12 +60,13 @@ const emailStyles = `
   .progress-fill { background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%); height: 100%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold; font-size: 12px; }
 `;
 
-export async function sendVerificationCode(email: string, code: string) {
+export async function sendVerificationCode(email: string, code: string, userId: string | null = null) {
+  const subject = 'Your Leverage Journal Verification Code';
   try {
     const mailOptions = {
       from: `"Leverage Journal" <${process.env.EMAIL_USER || 'khamareclarke@gmail.com'}>`,
       to: email,
-      subject: 'Your Leverage Journal Verification Code',
+      subject,
       html: `
         <!DOCTYPE html>
         <html>
@@ -74,19 +113,28 @@ export async function sendVerificationCode(email: string, code: string) {
 
     const info = await transporter.sendMail(mailOptions);
     console.log('Email sent:', info.messageId);
+    
+    // Log successful email
+    await logEmail(email, 'verification_code', subject, null, userId, info.messageId || null, 'sent', null, { code: '******' });
+    
     return { success: true, messageId: info.messageId };
   } catch (error: any) {
     console.error('Email send error:', error);
+    
+    // Log failed email
+    await logEmail(email, 'verification_code', subject, null, userId, null, 'failed', error.message, null);
+    
     throw new Error(`Failed to send email: ${error.message}`);
   }
 }
 
-export async function sendJournalReminder(email: string, userName: string) {
+export async function sendJournalReminder(email: string, userName: string, userId: string | null = null) {
+  const subject = '📔 Don\'t forget your daily journal entry!';
   try {
     const mailOptions = {
       from: `"Leverage Journal" <${process.env.EMAIL_USER || 'khamareclarke@gmail.com'}>`,
       to: email,
-      subject: '📔 Don\'t forget your daily journal entry!',
+      subject,
       html: `
         <!DOCTYPE html>
         <html>
@@ -119,14 +167,23 @@ export async function sendJournalReminder(email: string, userName: string) {
     };
 
     const info = await transporter.sendMail(mailOptions);
+    
+    // Log successful email
+    await logEmail(email, 'journal_reminder', subject, userName, userId, info.messageId || null, 'sent', null, null);
+    
     return { success: true, messageId: info.messageId };
   } catch (error: any) {
     console.error('Journal reminder email error:', error);
+    
+    // Log failed email
+    await logEmail(email, 'journal_reminder', subject, userName, userId, null, 'failed', error.message, null);
+    
     throw new Error(`Failed to send email: ${error.message}`);
   }
 }
 
-export async function sendGoalProgressReminder(email: string, userName: string, goals: Array<{title: string, progress: number}>) {
+export async function sendGoalProgressReminder(email: string, userName: string, goals: Array<{title: string, progress: number}>, userId: string | null = null) {
+  const subject = '🎯 Keep pushing toward your goals!';
   try {
     const goalsHtml = goals.map(goal => {
       const remaining = 100 - goal.progress;
@@ -146,7 +203,7 @@ export async function sendGoalProgressReminder(email: string, userName: string, 
     const mailOptions = {
       from: `"Leverage Journal" <${process.env.EMAIL_USER || 'khamareclarke@gmail.com'}>`,
       to: email,
-      subject: '🎯 Keep pushing toward your goals!',
+      subject,
       html: `
         <!DOCTYPE html>
         <html>
@@ -179,19 +236,28 @@ export async function sendGoalProgressReminder(email: string, userName: string, 
     };
 
     const info = await transporter.sendMail(mailOptions);
+    
+    // Log successful email
+    await logEmail(email, 'goal_reminder', subject, userName, userId, info.messageId || null, 'sent', null, { goalsCount: goals.length });
+    
     return { success: true, messageId: info.messageId };
   } catch (error: any) {
     console.error('Goal reminder email error:', error);
+    
+    // Log failed email
+    await logEmail(email, 'goal_reminder', subject, userName, userId, null, 'failed', error.message, { goalsCount: goals.length });
+    
     throw new Error(`Failed to send email: ${error.message}`);
   }
 }
 
-export async function sendWeeklyReviewReminder(email: string, userName: string, weekNumber: number) {
+export async function sendWeeklyReviewReminder(email: string, userName: string, weekNumber: number, userId: string | null = null) {
+  const subject = '📊 Time for your weekly review!';
   try {
     const mailOptions = {
       from: `"Leverage Journal" <${process.env.EMAIL_USER || 'khamareclarke@gmail.com'}>`,
       to: email,
-      subject: '📊 Time for your weekly review!',
+      subject,
       html: `
         <!DOCTYPE html>
         <html>
@@ -224,19 +290,28 @@ export async function sendWeeklyReviewReminder(email: string, userName: string, 
     };
 
     const info = await transporter.sendMail(mailOptions);
+    
+    // Log successful email
+    await logEmail(email, 'weekly_review', subject, userName, userId, info.messageId || null, 'sent', null, { weekNumber });
+    
     return { success: true, messageId: info.messageId };
   } catch (error: any) {
     console.error('Weekly review reminder email error:', error);
+    
+    // Log failed email
+    await logEmail(email, 'weekly_review', subject, userName, userId, null, 'failed', error.message, { weekNumber });
+    
     throw new Error(`Failed to send email: ${error.message}`);
   }
 }
 
-export async function sendTestEmail(email: string, userName: string) {
+export async function sendTestEmail(email: string, userName: string, userId: string | null = null) {
+  const subject = '🧪 Test Email - Leverage Journal';
   try {
     const mailOptions = {
       from: `"Leverage Journal" <${process.env.EMAIL_USER || 'khamareclarke@gmail.com'}>`,
       to: email,
-      subject: '🧪 Test Email - Leverage Journal',
+      subject,
       html: `
         <!DOCTYPE html>
         <html>
@@ -268,9 +343,17 @@ export async function sendTestEmail(email: string, userName: string) {
     };
 
     const info = await transporter.sendMail(mailOptions);
+    
+    // Log successful email
+    await logEmail(email, 'test_email', subject, userName, userId, info.messageId || null, 'sent', null, null);
+    
     return { success: true, messageId: info.messageId };
   } catch (error: any) {
     console.error('Test email error:', error);
+    
+    // Log failed email
+    await logEmail(email, 'test_email', subject, userName, userId, null, 'failed', error.message, null);
+    
     throw new Error(`Failed to send email: ${error.message}`);
   }
 }
