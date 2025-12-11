@@ -19,8 +19,8 @@ function hasContent(entry: any): boolean {
   );
 }
 
-// POST: Check and send daily reminders (journal + goals) - called by cron
-export async function POST(request: NextRequest) {
+// Shared function to handle daily reminders
+async function handleDailyReminders(request: NextRequest) {
   try {
     // Verify cron secret (optional but recommended)
     // Vercel cron jobs are automatically authenticated, but we can add extra security
@@ -146,5 +146,15 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// GET: Check and send daily reminders (journal + goals) - called by cron
+export async function GET(request: NextRequest) {
+  return handleDailyReminders(request);
+}
+
+// POST: Check and send daily reminders (journal + goals) - called by cron
+export async function POST(request: NextRequest) {
+  return handleDailyReminders(request);
 }
 

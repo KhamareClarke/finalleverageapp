@@ -5,8 +5,8 @@ import { sendGoalProgressReminder } from '@/lib/email';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-// POST: Check and send goal progress reminders (called by cron)
-export async function POST(request: NextRequest) {
+// Shared function to handle goal reminders
+async function handleGoalReminders(request: NextRequest) {
   try {
     // Verify cron secret (optional but recommended)
     // Vercel cron jobs are automatically authenticated, but we can add extra security
@@ -84,5 +84,15 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// GET: Check and send goal progress reminders (called by cron)
+export async function GET(request: NextRequest) {
+  return handleGoalReminders(request);
+}
+
+// POST: Check and send goal progress reminders (called by cron)
+export async function POST(request: NextRequest) {
+  return handleGoalReminders(request);
 }
 

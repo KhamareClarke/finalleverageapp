@@ -36,8 +36,8 @@ function getWeekStartDate(firstEntryDate: string): string {
   return weekStart.toISOString().split('T')[0];
 }
 
-// POST: Check and send weekly review reminders (called by cron)
-export async function POST(request: NextRequest) {
+// Shared function to handle weekly review reminders
+async function handleWeeklyReviewReminders(request: NextRequest) {
   try {
     // Verify cron secret (optional but recommended)
     // Vercel cron jobs are automatically authenticated, but we can add extra security
@@ -123,5 +123,15 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// GET: Check and send weekly review reminders (called by cron)
+export async function GET(request: NextRequest) {
+  return handleWeeklyReviewReminders(request);
+}
+
+// POST: Check and send weekly review reminders (called by cron)
+export async function POST(request: NextRequest) {
+  return handleWeeklyReviewReminders(request);
 }
 
