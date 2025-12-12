@@ -123,7 +123,6 @@ const DailyFlowTab = memo(function DailyFlowTab({ preloadedData }: { preloadedDa
             });
             if (insightsResponse.ok) {
               const insightsData = await insightsResponse.json();
-              console.log('AI Suggestions received:', insightsData.aiSuggestions);
               if (insightsData.aiSuggestions && Array.isArray(insightsData.aiSuggestions) && insightsData.aiSuggestions.length > 0) {
                 setAiSuggestions(insightsData.aiSuggestions);
               } else {
@@ -1916,15 +1915,10 @@ export default function Dashboard() {
         const { data: { session } } = await supabase.auth.getSession();
         const token = session?.access_token;
 
-        console.log('🔑 Dashboard: Session check - User:', user?.email, 'Token exists:', !!token);
-
         if (!token) {
-          console.error('❌ Dashboard: No token found');
           setDataPreloaded(true);
           return;
         }
-
-        console.log('🔑 Dashboard: Token found, fetching data for user:', user?.email);
 
         // Get today's date in local format (YYYY-MM-DD)
         const now = new Date();
@@ -1934,40 +1928,22 @@ export default function Dashboard() {
         const [statsRes, insightsRes, foundationRes, goalsRes, journalTodayRes, journalListRes] = await Promise.all([
           fetch('/api/progress/stats', {
             headers: { 'Authorization': `Bearer ${token}` },
-          }).catch((err) => {
-            console.error('Stats fetch error:', err);
-            return { ok: false };
-          }),
+          }).catch(() => ({ ok: false })),
           fetch('/api/insights', {
             headers: { 'Authorization': `Bearer ${token}` },
-          }).catch((err) => {
-            console.error('Insights fetch error:', err);
-            return { ok: false };
-          }),
+          }).catch(() => ({ ok: false })),
           fetch('/api/foundation/list', {
             headers: { 'Authorization': `Bearer ${token}` },
-          }).catch((err) => {
-            console.error('Foundation fetch error:', err);
-            return { ok: false };
-          }),
+          }).catch(() => ({ ok: false })),
           fetch('/api/goals', {
             headers: { 'Authorization': `Bearer ${token}` },
-          }).catch((err) => {
-            console.error('Goals fetch error:', err);
-            return { ok: false };
-          }),
+          }).catch(() => ({ ok: false })),
           fetch(`/api/journal/entries?date=${todayStr}`, {
             headers: { 'Authorization': `Bearer ${token}` },
-          }).catch((err) => {
-            console.error('Journal today fetch error:', err);
-            return { ok: false };
-          }),
+          }).catch(() => ({ ok: false })),
           fetch('/api/journal/list', {
             headers: { 'Authorization': `Bearer ${token}` },
-          }).catch((err) => {
-            console.error('Journal list fetch error:', err);
-            return { ok: false };
-          }),
+          }).catch(() => ({ ok: false })),
         ]);
 
         const newData: any = {
@@ -2073,24 +2049,18 @@ export default function Dashboard() {
           if (journalTodayRes.ok && journalTodayRes instanceof Response) {
             const journalData = await journalTodayRes.json();
             newData.journalTodayEntry = journalData.entry;
-            console.log('Journal today entry loaded:', newData.journalTodayEntry ? 'Yes' : 'No');
-          } else if (journalTodayRes instanceof Response) {
-            console.warn('Journal today response not OK:', journalTodayRes.status);
           }
         } catch (err) {
-          console.error('Error parsing journal today:', err);
+          // Silent fail
         }
 
         try {
           if (journalListRes.ok && journalListRes instanceof Response) {
             const journalListData = await journalListRes.json();
             newData.journalList = journalListData.entries || [];
-            console.log('Journal list loaded:', newData.journalList.length);
-          } else if (journalListRes instanceof Response) {
-            console.warn('Journal list response not OK:', journalListRes.status);
           }
         } catch (err) {
-          console.error('Error parsing journal list:', err);
+          // Silent fail
         }
 
         console.log('✅ Final preloaded data:', newData);
