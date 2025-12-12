@@ -150,8 +150,8 @@ export async function GET(request: NextRequest) {
     
     // Get account creation date or first entry date
     let startDate: Date;
-    if (user.created_at) {
-      startDate = new Date(user.created_at);
+    if ((user as any)?.created_at) {
+      startDate = new Date((user as any).created_at);
       startDate.setHours(0, 0, 0, 0);
     } else if (entriesWithContent.length > 0) {
       // Use first entry date if no account creation date
