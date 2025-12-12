@@ -45,6 +45,11 @@ import {
 const DailyFlowTab = memo(function DailyFlowTab({ preloadedData }: { preloadedData?: any }) {
   const { user } = useAuth();
   const router = useRouter();
+  const [allEntries, setAllEntries] = useState<any[]>([]);
+  const [loadingEntries, setLoadingEntries] = useState(true);
+  const [accountCreatedDate, setAccountCreatedDate] = useState<string>('');
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+
   // Use local date to avoid timezone issues (same as daily journal page)
   const today = typeof window !== 'undefined' ? (() => {
     const now = new Date();
@@ -83,10 +88,159 @@ const DailyFlowTab = memo(function DailyFlowTab({ preloadedData }: { preloadedDa
     return 0;
   }, [todayEntry, preloadedData?.journalList, today]);
 
-  const handleGoToJournal = () => {
-    // Navigate to the daily journal entry page
-    router.push('/dashboard/daily');
+  // Load all entries since account creation
+  useEffect(() => {
+    const loadAllEntries = async () => {
+      if (!user) return;
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+
+        if (!token) {
+          setLoadingEntries(false);
+          return;
+        }
+
+        // Fetch all journal entries first
+        const response = await fetch('/api/journal/list', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const entries = data.entries || [];
+          setAllEntries(entries);
+
+          // Also fetch insights for AI suggestions
+          try {
+            const insightsResponse = await fetch('/api/insights', {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+              },
+            });
+            if (insightsResponse.ok) {
+              const insightsData = await insightsResponse.json();
+              console.log('AI Suggestions received:', insightsData.aiSuggestions);
+              if (insightsData.aiSuggestions && Array.isArray(insightsData.aiSuggestions) && insightsData.aiSuggestions.length > 0) {
+                setAiSuggestions(insightsData.aiSuggestions);
+              } else {
+                // Fallback: generate suggestions from local data
+                const localSuggestions: string[] = [];
+                if (entries.length === 0) {
+                  localSuggestions.push("🌟 Welcome! Start your journaling journey today. Complete your first entry to begin tracking your progress.");
+                } else {
+                  const filledCount = entries.filter(e => hasContent(e)).length;
+                  if (filledCount > 0) {
+                    localSuggestions.push("📝 You've logged " + filledCount + " entr" + (filledCount !== 1 ? 'ies' : 'y') + ". Keep building your journaling habit!");
+                  }
+                }
+                if (localSuggestions.length > 0) {
+                  setAiSuggestions(localSuggestions);
+                }
+              }
+            }
+          } catch (insightsError) {
+            console.error('Failed to load insights:', insightsError);
+            // Fallback suggestions
+            if (allEntries.length === 0) {
+              setAiSuggestions(["🌟 Welcome! Start your journaling journey today."]);
+            }
+          }
+
+          // Use the earliest entry date as start date, or account creation date, or today
+          if (entries.length > 0) {
+            // Find earliest entry date
+            const sortedEntries = [...entries].sort((a, b) => 
+              new Date(a.entry_date).getTime() - new Date(b.entry_date).getTime()
+            );
+            const earliestDate = sortedEntries[0].entry_date;
+            setAccountCreatedDate(earliestDate);
+          } else if (user.created_at) {
+            // No entries yet, use account creation date
+            const createdDate = new Date(user.created_at);
+            const year = createdDate.getFullYear();
+            const month = String(createdDate.getMonth() + 1).padStart(2, '0');
+            const day = String(createdDate.getDate()).padStart(2, '0');
+            setAccountCreatedDate(`${year}-${month}-${day}`);
+          } else {
+            // Fallback to today
+            setAccountCreatedDate(today);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load entries:', error);
+      } finally {
+        setLoadingEntries(false);
+      }
+    };
+
+    if (user) {
+      loadAllEntries();
+    }
+  }, [user, today]);
+
+  // Generate exactly 90 days from account creation/first entry date
+  const allDays = useMemo(() => {
+    if (!accountCreatedDate) {
+      // If no start date yet, at least show today
+      return today ? [today] : [];
+    }
+
+    const startDate = new Date(accountCreatedDate + 'T00:00:00');
+    const days: string[] = [];
+    const currentDate = new Date(startDate);
+
+    // Generate exactly 90 days from the start date (90-day program)
+    for (let i = 0; i < 90; i++) {
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const day = String(currentDate.getDate()).padStart(2, '0');
+      days.push(`${year}-${month}-${day}`);
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return days; // Oldest first (chronological order)
+  }, [accountCreatedDate, today]);
+
+  // Helper to check if entry has content
+  const hasContent = (entry: any): boolean => {
+    return !!(
+      entry?.gratitude?.trim() ||
+      entry?.priority_1?.trim() ||
+      entry?.priority_2?.trim() ||
+      entry?.priority_3?.trim() ||
+      (entry?.tasks && Array.isArray(entry.tasks) && entry.tasks.length > 0 && 
+       entry.tasks.some((t: any) => t && t.text && t.text.trim().length > 0)) ||
+      entry?.reflection?.trim() ||
+      entry?.mood?.trim()
+    );
   };
+
+  // Get entry for a specific date
+  const getEntryForDate = (date: string) => {
+    return allEntries.find(e => e.entry_date === date);
+  };
+
+  const handleGoToJournal = (date?: string) => {
+    if (date) {
+      router.push(`/dashboard/daily?date=${date}`);
+    } else {
+    router.push('/dashboard/daily');
+    }
+  };
+
+  const filledCount = allEntries.filter(e => hasContent(e)).length;
+  const totalDays = allDays.length; // Total days from start to today (or 90 days)
+  // Only count missing days for dates that have passed (up to today)
+  const todayDate = today ? new Date(today + 'T00:00:00') : new Date();
+  const daysUpToToday = allDays.filter(date => {
+    const dateObj = new Date(date + 'T00:00:00');
+    return dateObj <= todayDate;
+  }).length;
+  const missingDays = Math.max(0, daysUpToToday - filledCount); // Only count missing days up to today
 
   return (
     <div className="space-y-8">
@@ -95,74 +249,207 @@ const DailyFlowTab = memo(function DailyFlowTab({ preloadedData }: { preloadedDa
         <p className="text-gray-400">Digital version of your 180 daily pages - 90-day transformation</p>
       </div>
 
-      {todayEntry ? (
-        // Entry already filled
-        <Card className="bg-gradient-to-r from-green-500/10 to-green-600/5 border border-green-500/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 text-center">
-          <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-          <h3 className="text-2xl font-bold text-white mb-2">You are already done! 🎉</h3>
-          <p className="text-gray-300 mb-6">Today's journal entry has been completed.</p>
-          <div className="flex items-center justify-center gap-2 text-yellow-400 mb-6">
-            <Flame className="w-6 h-6" />
-            <span className="text-xl font-bold">Streak: {streak} days 🔥</span>
+      {/* Summary Stats */}
+      <Card className="bg-gradient-to-r from-yellow-500/10 to-yellow-600/5 border border-yellow-500/30 rounded-xl p-4 sm:p-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+          <div>
+            <div className="text-2xl sm:text-3xl font-bold text-yellow-400">{filledCount}</div>
+            <div className="text-sm text-gray-400 mt-1">Entries Filled</div>
           </div>
-          <Link href="/dashboard/daily">
-            <Button className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold w-full sm:w-auto touch-manipulation min-h-[44px] text-sm sm:text-base">
+          <div>
+            <div className="text-2xl sm:text-3xl font-bold text-white">{missingDays}</div>
+            <div className="text-sm text-gray-400 mt-1">Missing Days</div>
+          </div>
+          <div>
+            <div className="text-2xl sm:text-3xl font-bold text-green-400">{totalDays}</div>
+            <div className="text-sm text-gray-400 mt-1">Total Days</div>
+          </div>
+          <div>
+            <div className="text-2xl sm:text-3xl font-bold text-orange-400">{streak >= 3 ? streak : 0}</div>
+            <div className="text-sm text-gray-400 mt-1">Streak</div>
+            {streak >= 3 && (
+              <div className="text-xs text-orange-400 mt-1 flex items-center justify-center gap-1">
+                <Flame className="w-3 h-3" />
+                Active
+              </div>
+            )}
+            {streak > 0 && streak < 3 && (
+              <div className="text-xs text-gray-500 mt-1">Need 3 days</div>
+            )}
+          </div>
+        </div>
+      </Card>
+
+      {/* Today's Entry Status */}
+      {todayEntry ? (
+        <Card className="bg-gradient-to-r from-green-500/10 to-green-600/5 border border-green-500/30 rounded-xl p-4 sm:p-6 text-center">
+          <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-3" />
+          <h3 className="text-xl font-bold text-white mb-2">Today's entry completed! 🎉</h3>
+          <Button 
+            onClick={() => handleGoToJournal()}
+            className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold mt-4"
+          >
               <BookOpen className="w-4 h-4 mr-2" />
-              View All Entries
+            Edit Today's Entry
             </Button>
-          </Link>
         </Card>
       ) : (
-        // Entry not filled - show benefits and button
-        <div className="space-y-4 sm:space-y-6">
-          <Card className="bg-gradient-to-r from-yellow-500/10 to-yellow-600/5 border border-yellow-500/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8">
-            <h3 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-              <BookOpen className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-400 flex-shrink-0" />
-              <span>Benefits of Daily Journaling</span>
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-              <div className="flex items-start gap-3 sm:gap-4">
-                <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400 flex-shrink-0 mt-1" />
+        <Card className="bg-gradient-to-r from-yellow-500/10 to-yellow-600/5 border border-yellow-500/30 rounded-xl p-4 sm:p-6 text-center">
+          <h3 className="text-xl font-bold text-white mb-4">Start Today's Journal Entry</h3>
+          <Button 
+            onClick={() => handleGoToJournal()}
+            className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+          >
+            <BookOpen className="w-4 h-4 mr-2" />
+            Start Today's Entry
+          </Button>
+        </Card>
+      )}
+
+      {/* AI Suggestions - Logic-based insights */}
+      <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/30 rounded-xl p-6">
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
+            <Brain className="w-5 h-5 text-purple-400" />
+                </div>
                 <div>
-                  <h4 className="font-semibold text-white mb-1 text-sm sm:text-base">Mental Clarity</h4>
-                  <p className="text-gray-400 text-xs sm:text-sm">Organize your thoughts and reduce mental clutter</p>
+            <h3 className="text-xl font-bold text-white">AI Insights & Suggestions</h3>
+            <p className="text-sm text-gray-400">Logic-based interpretation of your journal patterns</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 sm:gap-4">
-                <Target className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400 flex-shrink-0 mt-1" />
-                <div>
-                  <h4 className="font-semibold text-white mb-1 text-sm sm:text-base">Goal Achievement</h4>
-                  <p className="text-gray-400 text-xs sm:text-sm">Track progress and stay focused on priorities</p>
+        <div className="space-y-3">
+          {(aiSuggestions.length > 0 || (preloadedData?.insights?.aiSuggestions && preloadedData.insights.aiSuggestions.length > 0)) ? (
+            (aiSuggestions.length > 0 ? aiSuggestions : preloadedData.insights.aiSuggestions).map((suggestion: string, index: number) => {
+              // Determine icon and color based on suggestion content
+              let icon = Sparkles;
+              let bgColor = 'bg-blue-500/10';
+              let borderColor = 'border-blue-500/30';
+              let textColor = 'text-blue-400';
+              
+              if (suggestion.includes('🔥') || suggestion.includes('streak')) {
+                icon = Flame;
+                bgColor = 'bg-green-500/10';
+                borderColor = 'border-green-500/30';
+                textColor = 'text-green-400';
+              } else if (suggestion.includes('⚠️') || suggestion.includes('missed')) {
+                icon = Calendar;
+                bgColor = 'bg-red-500/10';
+                borderColor = 'border-red-500/30';
+                textColor = 'text-red-400';
+              } else if (suggestion.includes('📈') || suggestion.includes('increasing')) {
+                icon = TrendingUp;
+                bgColor = 'bg-green-500/10';
+                borderColor = 'border-green-500/30';
+                textColor = 'text-green-400';
+              } else if (suggestion.includes('📉') || suggestion.includes('decreased')) {
+                icon = TrendingUp;
+                bgColor = 'bg-yellow-500/10';
+                borderColor = 'border-yellow-500/30';
+                textColor = 'text-yellow-400';
+              } else if (suggestion.includes('🎯') || suggestion.includes('goal')) {
+                icon = Target;
+                bgColor = 'bg-yellow-500/10';
+                borderColor = 'border-yellow-500/30';
+                textColor = 'text-yellow-400';
+              }
+              
+              const IconComponent = icon;
+              
+              return (
+                <div key={index} className={`p-4 ${bgColor} border ${borderColor} rounded-lg`}>
+                  <div className="flex items-start space-x-3">
+                    <IconComponent className={`w-5 h-5 ${textColor} flex-shrink-0 mt-0.5`} />
+                    <p className={`text-sm ${textColor.replace('text-', 'text-').replace('-400', '-300')}`}>
+                      {suggestion}
+                    </p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 sm:gap-4">
-                <Heart className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400 flex-shrink-0 mt-1" />
-                <div>
-                  <h4 className="font-semibold text-white mb-1 text-sm sm:text-base">Gratitude Practice</h4>
-                  <p className="text-gray-400 text-xs sm:text-sm">Cultivate positivity and appreciation daily</p>
+              );
+            })
+          ) : (
+            <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+              <div className="flex items-start space-x-3">
+                <Sparkles className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-gray-300">Start journaling to receive personalized AI insights and suggestions!</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 sm:gap-4">
-                <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400 flex-shrink-0 mt-1" />
-                <div>
-                  <h4 className="font-semibold text-white mb-1 text-sm sm:text-base">Personal Growth</h4>
-                  <p className="text-gray-400 text-xs sm:text-sm">Reflect on experiences and learn from each day</p>
-                </div>
-              </div>
+          )}
             </div>
           </Card>
 
-          <div className="text-center">
-            <Button 
-              onClick={handleGoToJournal}
-              className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg w-full sm:w-auto touch-manipulation min-h-[56px]"
-            >
-              <BookOpen className="w-5 h-5 mr-2" />
-              Start Today's Journal Entry
-            </Button>
+      {/* All Entries Grid */}
+      <div>
+        <h3 className="text-xl font-bold text-white mb-4">All Daily Entries</h3>
+        {loadingEntries ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500 mx-auto mb-4"></div>
+            <p className="text-gray-400">Loading entries...</p>
           </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+            {allDays.map((date) => {
+              const entry = getEntryForDate(date);
+              const isFilled = entry && hasContent(entry);
+              const isToday = date === today;
+              const dateObj = new Date(date + 'T00:00:00');
+              const todayObj = new Date(today + 'T00:00:00');
+              const isFuture = dateObj > todayObj;
+              const isPast = dateObj < todayObj;
+              
+              // Only allow clicking on today (if not filled) or filled entries (to view)
+              const canClick = (isToday && !isFilled) || (isFilled);
+              const isDisabled = isFuture || (isPast && !isFilled);
+              
+              return (
+                <Card
+                  key={date}
+                  onClick={() => {
+                    if (canClick && !isDisabled) {
+                      handleGoToJournal(date);
+                    }
+                  }}
+                  className={`transition-all ${
+                    canClick && !isDisabled
+                      ? 'cursor-pointer hover:scale-105'
+                      : 'cursor-not-allowed opacity-50'
+                  } ${
+                    isFilled
+                      ? 'bg-gradient-to-br from-green-500/20 to-green-600/10 border-green-500/50'
+                      : 'bg-neutral-800/50 border-gray-700/50'
+                  } ${isToday ? 'ring-2 ring-yellow-500/50' : ''} ${isFuture ? 'opacity-30' : ''}`}
+                >
+                  <div className="p-3 sm:p-4 text-center">
+                    <div className={`text-xs sm:text-sm font-semibold mb-1 ${
+                      isFilled ? 'text-green-400' : 'text-gray-500'
+                    }`}>
+                      {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+          </div>
+                    <div className="text-xs text-gray-400 mb-2">
+                      {new Date(date).toLocaleDateString('en-US', { weekday: 'short' })}
+                    </div>
+                    {isFilled ? (
+                      <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-green-400 mx-auto" />
+                    ) : (
+                      <div className="w-6 h-6 sm:w-8 sm:h-8 mx-auto border-2 border-dashed border-gray-600 rounded flex items-center justify-center">
+                        <span className="text-gray-600 text-xs">—</span>
         </div>
       )}
+                    {isToday && (
+                      <div className="mt-2 text-xs text-yellow-400 font-semibold">Today</div>
+                    )}
+                    {isFuture && (
+                      <div className="mt-2 text-xs text-gray-500">Future</div>
+                    )}
+                    {isPast && !isFilled && (
+                      <div className="mt-2 text-xs text-gray-500">Missed</div>
+                    )}
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 });
@@ -176,13 +463,29 @@ const HomeTab = memo(function HomeTab({ preloadedData }: { preloadedData?: any }
 
 
   // Memoize computed values for performance
-  const totalGoals = useMemo(() => insights?.totalGoals || 0, [insights?.totalGoals]);
-  const activeGoals = useMemo(() => totalGoals - (insights?.goalsCompleted || 0), [totalGoals, insights?.goalsCompleted]);
+  // Get goals from preloadedData to calculate active goals correctly
+  const allGoalsFromData = useMemo(() => preloadedData?.goals || [], [preloadedData?.goals]);
+  const activeGoalsList = useMemo(() => 
+    allGoalsFromData.filter((g: any) => g.status !== 'completed'), 
+    [allGoalsFromData]
+  );
+  const totalGoals = useMemo(() => activeGoalsList.length, [activeGoalsList.length]);
+  const activeGoals = useMemo(() => totalGoals, [totalGoals]);
+  const goalsCompleted = useMemo(() => 
+    allGoalsFromData.filter((g: any) => g.status === 'completed').length,
+    [allGoalsFromData]
+  );
   const daysCompleted = useMemo(() => stats?.daysCompleted || insights?.daysCompleted || 0, [stats?.daysCompleted, insights?.daysCompleted]);
   const currentStreak = useMemo(() => stats?.currentStreak || insights?.currentStreak || 0, [stats?.currentStreak, insights?.currentStreak]);
   const aiScore = useMemo(() => insights?.momentumScore || 0, [insights?.momentumScore]);
+  const scoreExplanation = useMemo(() => insights?.scoreExplanation || [], [insights?.scoreExplanation]);
   const weeklyProgress = useMemo(() => stats?.weeklyProgress || 0, [stats?.weeklyProgress]);
   const goalsProgress = useMemo(() => insights?.goalsProgress || 0, [insights?.goalsProgress]);
+  const missedDays = useMemo(() => insights?.missedDays || 0, [insights?.missedDays]);
+  const missedDates = useMemo(() => insights?.missedDates || [], [insights?.missedDates]);
+  const totalDaysSinceStart = useMemo(() => insights?.totalDaysSinceStart || 0, [insights?.totalDaysSinceStart]);
+  const aiRecommendations = useMemo(() => insights?.aiRecommendations || [], [insights?.aiRecommendations]);
+  const patternAnalysis = useMemo(() => insights?.patternAnalysis || null, [insights?.patternAnalysis]);
   
   const getMomentumLabel = useCallback((score: number) => {
     if (score >= 80) return 'Elite Performance';
@@ -243,7 +546,7 @@ const HomeTab = memo(function HomeTab({ preloadedData }: { preloadedData?: any }
           </div>
           <div className="text-3xl font-bold text-white mb-1">{activeGoals}</div>
           <div className="text-sm text-gray-400 mb-2">Active Goals</div>
-          <div className="text-xs text-green-400">{insights?.goalsCompleted || 0} completed</div>
+          <div className="text-xs text-green-400">{goalsCompleted} completed</div>
         </Card>
 
         <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/30 p-4 sm:p-5 md:p-6 group hover:shadow-xl hover:shadow-green-500/20 transition-all">
@@ -268,6 +571,26 @@ const HomeTab = memo(function HomeTab({ preloadedData }: { preloadedData?: any }
           <div className="text-3xl font-bold text-white mb-1">{aiScore}</div>
           <div className="text-sm text-gray-400 mb-2">AI Score</div>
           <div className="text-xs text-yellow-400">{getMomentumLabel(aiScore)}</div>
+          {scoreExplanation.length > 0 && (
+            <div className="mt-2 pt-2 border-t border-purple-500/20">
+              <div className="text-xs text-gray-400 mb-1">Why this score:</div>
+              {scoreExplanation.slice(0, 2).map((reason: string, idx: number) => (
+                <div key={idx} className="text-xs text-gray-300 mb-1">• {reason}</div>
+              ))}
+              {scoreExplanation.length > 2 && (
+                <details className="mt-1">
+                  <summary className="text-xs text-purple-400 cursor-pointer hover:text-purple-300">
+                    View all factors ({scoreExplanation.length})
+                  </summary>
+                  <div className="mt-2 space-y-1">
+                    {scoreExplanation.slice(2).map((reason: string, idx: number) => (
+                      <div key={idx + 2} className="text-xs text-gray-300">• {reason}</div>
+                    ))}
+                  </div>
+                </details>
+              )}
+            </div>
+          )}
         </Card>
 
         <Card className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/5 border border-yellow-500/30 p-4 sm:p-5 md:p-6 group hover:shadow-xl hover:shadow-yellow-500/20 transition-all">
@@ -282,6 +605,154 @@ const HomeTab = memo(function HomeTab({ preloadedData }: { preloadedData?: any }
           <div className="text-xs text-green-400">{weeklyProgress >= 70 ? 'Above average' : weeklyProgress >= 50 ? 'On track' : 'Keep going'}</div>
         </Card>
       </div>
+
+      {/* Missed Days Information */}
+      {missedDays > 0 && (
+        <Card className="bg-gradient-to-br from-red-500/10 to-red-600/5 border border-red-500/30 p-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center">
+              <Calendar className="w-5 h-5 text-red-400" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-white">Missed Days</h3>
+              <p className="text-sm text-gray-400">You missed {missedDays} day{missedDays !== 1 ? 's' : ''} since you started</p>
+            </div>
+          </div>
+          {totalDaysSinceStart > 0 && (
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-400">Completion Rate</span>
+                <span className="text-sm font-semibold text-white">
+                  {Math.round((daysCompleted / totalDaysSinceStart) * 100)}%
+                </span>
+              </div>
+              <div className="w-full bg-gray-700 rounded-full h-2">
+                <div 
+                  className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full transition-all"
+                  style={{ width: `${Math.min(100, (daysCompleted / totalDaysSinceStart) * 100)}%` }}
+                ></div>
+              </div>
+            </div>
+          )}
+          {missedDates.length > 0 && (
+            <div>
+              <p className="text-sm text-gray-400 mb-2">Recent missed dates:</p>
+              <div className="flex flex-wrap gap-2">
+                {missedDates.slice(0, 10).map((date: string) => (
+                  <span
+                    key={date}
+                    className="px-2 py-1 bg-red-500/20 border border-red-500/30 rounded text-xs text-red-300"
+                  >
+                    {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </span>
+                ))}
+                {missedDates.length > 10 && (
+                  <span className="px-2 py-1 bg-gray-700/50 border border-gray-600/30 rounded text-xs text-gray-400">
+                    +{missedDates.length - 10} more
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* AI Recommendations Layer - Pattern Analysis */}
+      {aiRecommendations.length > 0 && (
+        <Card className="bg-gradient-to-br from-purple-500/10 via-purple-400/5 to-purple-500/10 border border-purple-500/30 rounded-xl p-6">
+          <div className="flex items-center space-x-3 mb-6">
+            <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
+              <Brain className="w-6 h-6 text-purple-400" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-white">AI Recommendations</h3>
+              <p className="text-sm text-gray-400">Analyzed from your journal patterns</p>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            {aiRecommendations.map((rec: any, index: number) => {
+              const priorityColors: Record<string, string> = {
+                high: 'border-red-500/50 bg-red-500/10',
+                medium: 'border-yellow-500/50 bg-yellow-500/10',
+                low: 'border-green-500/50 bg-green-500/10'
+              };
+              const typeIcons: Record<string, any> = {
+                habit: Target,
+                goal: Trophy,
+                barrier: Activity,
+                progress: TrendingUp
+              };
+              const typeColors: Record<string, string> = {
+                habit: 'text-blue-400',
+                goal: 'text-yellow-400',
+                barrier: 'text-red-400',
+                progress: 'text-green-400'
+              };
+              
+              const IconComponent = typeIcons[rec.type] || Sparkles;
+              const bgColor = priorityColors[rec.priority] || 'border-gray-500/50 bg-gray-500/10';
+              const iconColor = typeColors[rec.type] || 'text-purple-400';
+              
+              return (
+                <div key={index} className={`p-4 rounded-lg border ${bgColor}`}>
+                  <div className="flex items-start space-x-3">
+                    <IconComponent className={`w-5 h-5 ${iconColor} flex-shrink-0 mt-0.5`} />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <h4 className="font-semibold text-white">{rec.title}</h4>
+                        {rec.priority === 'high' && (
+                          <span className="text-xs px-2 py-1 bg-red-500/20 text-red-400 rounded">High Priority</span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-300">{rec.description}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          
+          {/* Pattern Analysis Summary */}
+          {patternAnalysis && (
+            <div className="mt-6 pt-6 border-t border-purple-500/20">
+              <h4 className="text-lg font-bold text-white mb-4">Your Journal Patterns</h4>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {patternAnalysis.taskCompletionRate > 0 && (
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-yellow-400">{patternAnalysis.taskCompletionRate}%</div>
+                    <div className="text-xs text-gray-400 mt-1">Task Completion</div>
+                  </div>
+                )}
+                {patternAnalysis.priorityConsistency > 0 && (
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-400">{patternAnalysis.priorityConsistency}%</div>
+                    <div className="text-xs text-gray-400 mt-1">Priority Setting</div>
+                  </div>
+                )}
+                {patternAnalysis.reflectionDepth > 0 && (
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-purple-400">{patternAnalysis.reflectionDepth}%</div>
+                    <div className="text-xs text-gray-400 mt-1">Deep Reflections</div>
+                  </div>
+                )}
+                {patternAnalysis.gratitudeFrequency > 0 && (
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-400">{patternAnalysis.gratitudeFrequency}%</div>
+                    <div className="text-xs text-gray-400 mt-1">Gratitude Practice</div>
+                  </div>
+                )}
+              </div>
+              {patternAnalysis.mostCommonMood && (
+                <div className="mt-4 text-center">
+                  <div className="text-sm text-gray-400">Most Common Mood</div>
+                  <div className="text-lg font-semibold text-white mt-1 capitalize">{patternAnalysis.mostCommonMood}</div>
+                </div>
+              )}
+            </div>
+          )}
+        </Card>
+      )}
 
       {/* AI Insights & Recommendations */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -742,9 +1213,66 @@ const GoalsTab = memo(function GoalsTab({ preloadedData }: { preloadedData?: any
 // Insights Tab Component - Memoized for instant switching
 const InsightsTab = memo(function InsightsTab({ preloadedData }: { preloadedData?: any }) {
   const { user } = useAuth();
-  // Use preloaded data directly - instant rendering
-  const insights = useMemo(() => preloadedData?.insights || null, [preloadedData?.insights]);
-  const loading = useMemo(() => preloadedData?.insights === undefined, [preloadedData?.insights]);
+  const [insightsData, setInsightsData] = useState<any>(preloadedData?.insights || null);
+  const [loadingInsights, setLoadingInsights] = useState(false);
+  
+  // Use preloaded data if available, otherwise fetch
+  const insights = useMemo(() => insightsData || preloadedData?.insights || null, [insightsData, preloadedData?.insights]);
+  const loading = useMemo(() => loadingInsights || (preloadedData?.insights === undefined && !insightsData), [loadingInsights, preloadedData?.insights, insightsData]);
+  
+  // Use preloadedData immediately, only fetch if missing
+  useEffect(() => {
+    if (!user) return;
+    
+    // Use preloadedData if available
+    if (preloadedData?.insights && Object.keys(preloadedData.insights).length > 0 && !insightsData) {
+      setInsightsData(preloadedData.insights);
+      return;
+    }
+    
+    // Only fetch if we don't have any insights data
+    if (insightsData && Object.keys(insightsData).length > 0) return;
+    
+    // Quick fetch with timeout
+    const fetchInsights = async () => {
+      setLoadingInsights(true);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+        
+        if (!token) {
+          setLoadingInsights(false);
+          return;
+        }
+        
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 3000);
+        
+        const response = await fetch('/api/insights', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeout);
+        
+        if (response.ok) {
+          const data = await response.json();
+          setInsightsData(data);
+        }
+      } catch (error: any) {
+        if (error.name !== 'AbortError') {
+          // Silent fail - use preloaded data if available
+        }
+      } finally {
+        setLoadingInsights(false);
+      }
+    };
+    
+    fetchInsights();
+  }, [user]);
+  
   const error = null; // No error state needed
 
   const getMomentumColor = (score: number) => {
@@ -889,10 +1417,10 @@ const InsightsTab = memo(function InsightsTab({ preloadedData }: { preloadedData
                   {(insights?.totalGoals || 0) > 0 ? Math.round(((insights?.goalsCompleted || 0) / (insights?.totalGoals || 1)) * 25) : 0}/25
                 </span>
               </div>
-              <div className="w-full bg-gray-800 rounded-full h-2">
+              <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
                 <div 
                   className="bg-gradient-to-r from-purple-500 to-purple-400 h-2 rounded-full"
-                  style={{ width: `${insights?.goalsProgress || 0}%` }}
+                  style={{ width: `${Math.min(100, insights?.goalsProgress || 0)}%` }}
                 ></div>
               </div>
             </div>
