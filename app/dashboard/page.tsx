@@ -156,9 +156,9 @@ const DailyFlowTab = memo(function DailyFlowTab({ preloadedData }: { preloadedDa
             );
             const earliestDate = sortedEntries[0].entry_date;
             setAccountCreatedDate(earliestDate);
-          } else if (user.created_at) {
+          } else if ((user as any)?.created_at) {
             // No entries yet, use account creation date
-            const createdDate = new Date(user.created_at);
+            const createdDate = new Date((user as any).created_at);
             const year = createdDate.getFullYear();
             const month = String(createdDate.getMonth() + 1).padStart(2, '0');
             const day = String(createdDate.getDate()).padStart(2, '0');
